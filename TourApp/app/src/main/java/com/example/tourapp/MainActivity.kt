@@ -1,6 +1,7 @@
 package com.example.tourapp
 
 import android.content.Intent
+import android.location.Location
 import android.os.Bundle
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +20,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //proba za git
     //override fun onCreateOptionsMenu(menu: Menu): Boolean {
        // // Inflate the menu; this adds items to the action bar if it is present.
        // menuInflater.inflate(R.menu.menu_my_places_list, menu)

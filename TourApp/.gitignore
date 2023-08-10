@@ -21,6 +21,13 @@ captures/
 *.apk
 output.json
 
+# Gradle files
+.gradle/
+build/
+
+# Log/OS Files
+*.log
+
 # IntelliJ
 *.iml
 .idea/

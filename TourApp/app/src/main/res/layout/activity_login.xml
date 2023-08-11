@@ -5,9 +5,10 @@
     android:id="@+id/main_browse_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginActivity"
+    tools:context=".MainActivity"
     tools:deviceIds="tv"
-    tools:ignore="MergeRootFrame" >
+    tools:ignore="MergeRootFrame">
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -29,6 +30,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10px"
                 android:layout_weight="1"
+                android:backgroundTint="@color/material_dynamic_tertiary50"
                 android:text="@string/login_activity_login_button" />
 
             <Button
@@ -37,8 +39,22 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10px"
                 android:layout_weight="1"
+                android:backgroundTint="@color/material_dynamic_tertiary50"
                 android:text="@string/login_activity_register_button" />
         </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
+            android:fontFamily="@font/bevan"
+            android:text="@string/welcome_message"
+            android:textColor="@color/material_dynamic_tertiary50"
+            android:textSize="40sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:ignore="MissingConstraints" />
 
         <TextView
             android:id="@+id/loginUserNameTV"
@@ -48,10 +64,10 @@
             android:layout_marginTop="50dp"
             android:text="@string/login_activity_username_label"
             android:textSize="24sp"
+            app:layout_constraintBottom_toTopOf="@id/loginSifraET"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/loginSifraET"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/loginUserNameET"

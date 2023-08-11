@@ -5,8 +5,9 @@ import android.content.Context
 import android.os.Looper
 import com.google.android.gms.location.*
 
+
 @SuppressLint("MissingPermission")
-class LocationClient constructor(
+class LocationClient(
     private val context: Context,
     private var iLocationClient: ILocationClient?
 ) {

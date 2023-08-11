@@ -41,6 +41,10 @@
             android:name=".About"
             android:label="About"
             android:theme="@style/Theme.AppCompat.Light.Dialog"></activity>
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

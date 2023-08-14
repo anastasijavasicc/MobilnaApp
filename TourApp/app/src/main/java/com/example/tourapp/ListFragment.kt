@@ -114,14 +114,18 @@ class ListFragment : Fragment() {
                 this.findNavController().navigate(R.id.action_ListFragment_to_EditFragment)
                 true
             }
+            R.id.action_users -> {
+                this.findNavController().navigate(R.id.action_ListFragment_to_UsersFragment)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        val item = menu.findItem(R.id.action_my_places_list)
-        item.isVisible = false;
+      //  val item = menu.findItem(R.id.action_my_places_list)
+     //   item.isVisible = false;
     }
     override fun onDestroyView() {
         super.onDestroyView()
@@ -134,6 +138,34 @@ class ListFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_main, menu)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val searchView: SearchView = binding.svTable
+        searchType = "name"
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                if (searchType.equals("grade") && query.toIntOrNull() == null)
+                    Toast.makeText(requireContext(), "Unesite broj", Toast.LENGTH_SHORT).show()
+                else
+                    getAndShowFiltredList(searchType, query, 0)
+                return true
+            }
+
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                if (newText.isNotEmpty())
+                    if (searchType.equals("grade") && newText.toIntOrNull() == null) {
+
+                        Toast.makeText(requireContext(), "Unesite broj", Toast.LENGTH_SHORT).show()
+                    } else
+                        getAndShowFiltredList(searchType, newText, 1)
+                else
+                    getList()
+                return true
+            }
+        })
     }
 
     fun listCreating(result: QuerySnapshot): kotlin.collections.ArrayList<MyPlaces> {
@@ -320,5 +352,47 @@ class ListFragment : Fragment() {
 
     }
 
+    private fun showPopupMenu(view: View, position: Int) {
+        val popupMenu = PopupMenu(requireContext(), view)
+        popupMenu.menuInflater.inflate(R.menu.popup_menu, popupMenu.menu)
+        if (!myPlacesViewModel.selected!!.autor.equals(userName)) {
+            val menu = popupMenu.menu.findItem(R.id.editPlace)
+            menu.isVisible = false
 
+        }
+
+        popupMenu.setOnMenuItemClickListener { menuItem ->
+
+            when (menuItem.itemId) {
+                R.id.viewPlace -> {
+
+                    findNavController().navigate(R.id.action_ListFragment_to_ViewFragment)
+                    true
+                }
+
+                R.id.editPlace -> {
+
+                    findNavController().navigate(R.id.action_ListFragment_to_EditFragment)
+
+                    true
+                }
+
+                R.id.showOnMap -> {
+
+                    this.findNavController().navigate(R.id.action_ListFragment_to_MapFragment)
+
+                    true
+                }
+                R.id.rankPlace -> {
+
+                    this.findNavController().navigate(R.id.action_ListFragment_to_RankFragment)
+                    true
+                }
+
+                else -> false
+            }
+        }
+
+        popupMenu.show()
+    }
 }

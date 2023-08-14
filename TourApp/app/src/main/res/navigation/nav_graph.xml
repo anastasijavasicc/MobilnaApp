@@ -36,6 +36,9 @@
         <action
             android:id="@+id/action_ListFragment_to_MapFragment"
             app:destination="@id/MapFragment" />
+        <action
+            android:id="@+id/action_ListFragment_to_UsersFragment"
+            app:destination="@id/UsersFragment" />
     </fragment>
     <fragment
         android:id="@+id/EditFragment"

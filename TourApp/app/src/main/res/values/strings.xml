@@ -50,4 +50,10 @@
     <string name="edit_fragment_galery_btn">Galery</string>
     <string name="edit_fragment_ocena_label">Grade</string>
     <string name="edit_fragment_save_label">Save</string>
+    <string name="editmyplace_category_label">Category</string>
+    <string name="list_fragment_autor_rb">Autor</string>
+    <string name="list_fragment_category_rb">Category</string>
+    <string name="list_fragment_grade_rb">Grade</string>
+    <string name="list_fragment_ok_btn">Ok</string>
+    <string name="list_fragment_reset_label">Reset</string>
 </resources>

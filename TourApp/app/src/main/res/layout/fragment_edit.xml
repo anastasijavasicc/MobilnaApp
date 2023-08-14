@@ -32,7 +32,19 @@
         <EditText
             android:id="@+id/editmyplace_name_edit"
             android:layout_width="242dp"
+            android:layout_height="36dp"
+            android:minHeight="48dp" />
+
+        <TextView
+            android:id="@+id/textViewCategory"
+            android:layout_width="242dp"
             android:layout_height="wrap_content"
+            android:text="@string/editmyplace_category_label" />
+
+        <EditText
+            android:id="@+id/editmyplace_category_edit"
+            android:layout_width="242dp"
+            android:layout_height="36dp"
             android:minHeight="48dp" />
 
         <TextView
@@ -56,7 +68,7 @@
         <EditText
             android:id="@+id/editmyplace_autor_edit"
             android:layout_width="242dp"
-            android:layout_height="wrap_content"
+            android:layout_height="36dp"
             android:minHeight="48dp" />
 
         <LinearLayout
@@ -141,7 +153,7 @@
                 <EditText
                     android:id="@+id/editmyplace_longitude_label"
                     android:layout_width="242dp"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="36dp" />
 
                 <TextView
                     android:id="@+id/textView5"
@@ -152,7 +164,7 @@
                 <EditText
                     android:id="@+id/editmyplace_latitude_label"
                     android:layout_width="241dp"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="36dp" />
             </LinearLayout>
 
             <Button
@@ -186,7 +198,8 @@
         android:layout_weight="1"
         android:text="@string/editmyplace_add_label"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="55dp" />
+        tools:layout_editor_absoluteX="55dp"
+        tools:ignore="MissingConstraints" />
 
     <Button
         android:id="@+id/editmyplace_cancel_button"
@@ -196,7 +209,8 @@
         android:layout_weight="1"
         android:text="@string/editmyplace_cancel_label"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="259dp" />
+        tools:layout_editor_absoluteX="259dp"
+        tools:ignore="MissingConstraints" />
 
     <TextView
         android:id="@+id/EditFragmentGradesTV"

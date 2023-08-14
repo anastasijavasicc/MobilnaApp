@@ -81,7 +81,7 @@ class EditFragment : Fragment() {
         val editName: EditText = requireView().findViewById(R.id.editmyplace_name_edit)
         val editDesc: EditText = requireView().findViewById(R.id.editmyplace_desc_edit)
         val editLongitude: EditText = requireView().findViewById(R.id.editmyplace_longitude_label)
-
+        val editCategory: EditText = requireView().findViewById(R.id.editmyplace_category_edit)
         val lonObserver = Observer<String> { newValue ->
             editLongitude.setText(newValue.toString())
         }
@@ -109,7 +109,7 @@ class EditFragment : Fragment() {
             editDesc.setText(myPlacesViewModel.selected?.description)
             editLongitude.setText(myPlacesViewModel.selected?.longitude.toString())
             editLatitude.setText(myPlacesViewModel.selected?.latitude.toString())
-
+            editCategory.setText(myPlacesViewModel.selected?.category)
             editAutor.setText(myPlacesViewModel.selected?.autor)
             var sum = 0.0
             for(g in myPlacesViewModel.selected?.grades!!)
@@ -163,6 +163,7 @@ class EditFragment : Fragment() {
             var starsCount = 0L
             var kommCount = 0L
             val grades = HashMap<String, Double>()
+            val category = editCategory.text.toString()
             if (ratGrade.rating.toDouble() != 0.0) {
                 grades[userName] = ratGrade.rating.toDouble()
                 starsCount += 2
@@ -180,8 +181,8 @@ class EditFragment : Fragment() {
                     "name" to name,
                     "latitude" to latitude,
                     "longitude" to longitude,
-                    "descriptiom" to desc,
-
+                    "description" to desc,
+                    "category" to category,
                     )
                 var fragmentContext = requireContext()
                 documentRef.update(place as Map<String, Any>)
@@ -208,6 +209,7 @@ class EditFragment : Fragment() {
                         grades,
                         HashMap(),
                         desc,
+                        category,
                         ""
                     )
 
@@ -230,7 +232,8 @@ class EditFragment : Fragment() {
                     "description" to desc,
                     "url" to "",
                     "grades" to grades,
-                    "geohash" to hash
+                    "geohash" to hash,
+                    "category" to category,
                 )
 
                 var imageView: ImageView =

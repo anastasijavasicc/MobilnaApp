@@ -8,6 +8,7 @@ data class MyPlaces(var name:String,
                     var grades:HashMap<String,Double>,
                     var comments:HashMap<String,String>,
                     var url:String,
+                    var category: String,
                     @Transient var id:String){
     override fun toString(): String = name
 

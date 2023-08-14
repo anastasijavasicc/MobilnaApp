@@ -9,6 +9,93 @@
     <ListView
         android:id="@+id/my_places_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        android:longClickable="true"
+        android:scrollbars="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
     </ListView>
+
+    <RadioGroup
+        android:id="@+id/rgTable"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/svTable">
+
+        <RadioButton
+            android:id="@+id/rbAutorTabela"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20px"
+            android:layout_marginEnd="20px"
+            android:text="@string/list_fragment_autor_rb" />
+
+        <RadioButton
+            android:id="@+id/rbTip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20px"
+            android:layout_marginEnd="20px"
+            android:text="@string/list_fragment_category_rb" />
+
+        <RadioButton
+            android:id="@+id/rbOcena"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20px"
+            android:layout_marginEnd="20px"
+            android:text="@string/list_fragment_grade_rb" />
+
+
+    </RadioGroup>
+
+    <SearchView
+        android:id="@+id/svTable"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </SearchView>
+
+
+    <Button
+        android:id="@+id/btnOk"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+
+        android:layout_margin="40px"
+        android:layout_marginBottom="16dp"
+        android:text="@string/list_fragment_ok_btn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/button3"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rgTable"
+        app:layout_constraintVertical_bias="0.221" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="40px"
+        android:layout_marginTop="200dp"
+
+        android:layout_marginBottom="16dp"
+        android:text="@string/list_fragment_reset_label"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@id/btnOk"
+        app:layout_constraintTop_toBottomOf="@+id/rgTable"
+        app:layout_constraintVertical_bias="0.225" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

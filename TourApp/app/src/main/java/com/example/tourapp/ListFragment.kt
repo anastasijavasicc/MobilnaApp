@@ -1,6 +1,7 @@
 package com.example.tourapp
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
@@ -12,8 +13,20 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.tourapp.data.MyPlaces
+import com.example.tourapp.data.User
+import com.example.tourapp.data.UserObject
 import com.example.tourapp.databinding.FragmentListBinding
+import com.example.tourapp.model.MyPlacesListAdapter
 import com.example.tourapp.model.MyPlacesViewModel
+import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.util.*
 
 /**
  * A simple [Fragment] subclass as the second destination in the navigation.
@@ -27,8 +40,11 @@ class ListFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
     private val myPlacesViewModel: MyPlacesViewModel by activityViewModels()
-
-
+    private val db = Firebase.firestore
+    private var searchType: String = "name"
+    private var userName: String = UserObject.username!!
+    private lateinit var myUser: User
+    var lastCheckedRadioButton: RadioButton? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -42,7 +58,9 @@ class ListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //binding.viewmyplaceNameText.text = myPlacesViewModel.selected?.name
+        getList()
+
+       /** //binding.viewmyplaceNameText.text = myPlacesViewModel.selected?.name
         val myPlacesList: ListView = requireView().findViewById<ListView>(R.id.my_places_list)
         myPlacesList.adapter = ArrayAdapter<MyPlaces>(view.context, android.R.layout.simple_list_item_1, myPlacesViewModel.myPlacesList)
 
@@ -66,6 +84,7 @@ class ListFragment : Fragment() {
                 menu?.add(0,4,4,"Show on map")
             }
         })
+       */
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
@@ -116,4 +135,190 @@ class ListFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_main, menu)
     }
+
+    fun listCreating(result: QuerySnapshot): kotlin.collections.ArrayList<MyPlaces> {
+
+        var list: kotlin.collections.ArrayList<MyPlaces> = ArrayList()
+        for (document in result) {
+            var data = document.data
+            var grades = HashMap<String, Double>()
+            if (data["grades"] != null) {
+                for (g in data["grades"] as HashMap<String, Double>)
+                    grades[g.key] = g.value
+            }
+            var comments = HashMap<String, String>()
+            if (data["comments"] != null) {
+                for (c in data["comments"] as HashMap<String, String>)
+                    comments[c.key] = c.value
+            }
+
+            list.add(
+                MyPlaces(
+                    data["name"].toString(),
+                    data["description"].toString(),
+                    data["longitude"].toString(),
+                    data["latitude"].toString(),
+                    data["autor"].toString(),
+                    grades,
+                    comments,
+                    data["url"].toString(),
+                    data["category"].toString(),
+                    document.id
+                )
+            )
+
+        }
+        return list
+    }
+    fun getList() {
+
+        myPlacesViewModel.myPlacesList.clear()
+
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    db.collection("places")
+
+                        .get()
+                        .await()
+                }
+
+                myPlacesViewModel.myPlacesList.addAll(listCreating(result))
+
+                showList(requireView(), myPlacesViewModel.myPlacesList)
+            } catch (e: Exception) {
+                Log.w("TAGA", "Greska", e)
+            }
+        }
+
+
+    }
+
+    fun showList(view: View, arrayList: ArrayList<MyPlaces>) {
+
+        val listView: ListView = requireView().findViewById(R.id.my_places_list)
+
+        val arrayAdapter = MyPlacesListAdapter(
+            view.context,
+            arrayList
+        )
+        listView.adapter = arrayAdapter
+
+        listView.setOnItemClickListener(object : AdapterView.OnItemClickListener {
+            override fun onItemClick(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                var myPlace: MyPlaces = p0?.adapter?.getItem(p2) as MyPlaces
+                myPlacesViewModel.selected = myPlace
+                findNavController().navigate(R.id.action_ListFragment_to_ViewFragment)
+
+            }
+        })
+
+
+        listView.setOnItemLongClickListener { parent, view, position, id ->
+            var myPlace: MyPlaces = parent?.adapter?.getItem(position) as MyPlaces
+            myPlacesViewModel.selected = myPlace
+
+            showPopupMenu(view, position)
+            true
+        }
+
+
+    }
+
+    fun getAndShowFiltredList(field: String, query: String, category: Int) {
+        myPlacesViewModel.myPlacesList.clear()
+
+
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                var result: QuerySnapshot
+                if (field.equals("grade")) {
+                    result = withContext(Dispatchers.IO) {
+                        db.collection("places")
+
+                            .get()
+                            .await()
+
+                    }
+                    for (document in result) {
+                        var data = document.data
+                        var grades = HashMap<String, Double>()
+                        var sum: Double = 0.0
+                        if (data["grades"] != null) {
+                            for (g in data["grades"] as HashMap<String, Double>) {
+                                grades[g.key] = g.value
+                                sum += g.value
+                            }
+                            sum /= grades.size
+
+                        }
+                        var comments = HashMap<String, String>()
+                        if (data["comments"] != null) {
+                            for (c in data["comments"] as HashMap<String, String>)
+                                comments[c.key] = c.value
+                        }
+
+                        var url: String =
+                            "places/" + data["name"] + data["latitude"].toString() + data["longitude"].toString() + ".jpg"
+                        if (sum >= query.toDouble())
+                            myPlacesViewModel
+                                .addPlace(
+                                    MyPlaces(
+                                        data["name"].toString(),
+                                        data["description"].toString(),
+                                        data["longitude"].toString(),
+                                        data["latitude"].toString(),
+                                        data["autor"].toString(),
+                                        grades,
+                                        comments,
+                                        data["url"].toString(),
+                                        data["category"].toString(),
+                                        document.id
+
+                                    )
+                                )
+
+                    }
+
+                    showList(requireView(), myPlacesViewModel.myPlacesList)
+
+                } else {
+                        if (category == 0) {
+
+                            result = withContext(Dispatchers.IO) {
+                                db.collection("places")
+                                    .whereEqualTo(field, query)
+
+                                    .get()
+                                    .await()
+
+                            }
+
+                        } else {
+
+                            result = withContext(Dispatchers.IO) {
+                                db.collection("places")
+                                    .whereGreaterThanOrEqualTo(field, query)
+
+                                    .get()
+                                    .await()
+                            }
+
+                        }
+
+
+
+
+                    myPlacesViewModel.myPlacesList.addAll(listCreating(result))
+                    showList(requireView(), myPlacesViewModel.myPlacesList)
+                }
+            } catch (e: Exception) {
+                Log.w("TAGA", "Greska", e)
+            }
+        }
+
+
+    }
+
+
 }

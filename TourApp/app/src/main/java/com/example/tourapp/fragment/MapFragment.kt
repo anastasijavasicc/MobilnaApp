@@ -12,6 +12,7 @@ import android.view.*
 import android.widget.Button
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import android.widget.SearchView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.res.ResourcesCompat
@@ -26,6 +27,11 @@ import com.example.tourapp.data.MyPlaces
 import com.example.tourapp.databinding.FragmentMapBinding
 import com.example.tourapp.model.LocationViewModel
 import com.example.tourapp.model.MyPlacesViewModel
+import com.firebase.geofire.GeoFireUtils
+import com.firebase.geofire.GeoLocation
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -277,18 +283,185 @@ class MapFragment : Fragment(), ILocationClient {
         markers.forEach { map.overlays.remove(it) }
         map.invalidate()
     }
+
+    private fun filterMap(field: String, value: String, type: Int) {
+        if (value != "") {
+            myPlacesViewModel.myPlacesList.clear()
+
+            CoroutineScope(Dispatchers.Main).launch {
+                try {
+                    var result: QuerySnapshot
+                    if (field == "radius") {
+                        val location = MainActivity.currentLocation
+                        var center: GeoLocation = if (location == null)
+                            GeoLocation(43.32289, 21.8925)
+                        else
+                            GeoLocation(location.latitude, location.longitude)
+
+                        val radius = value.toDouble()
+
+                        val bounds = GeoFireUtils.getGeoHashQueryBounds(center, radius)
+                        val tasks: MutableList<Task<QuerySnapshot>> = ArrayList()
+                        for (b in bounds) {
+                            val q = db.collection("places")
+                                .orderBy("geohash")
+                                .startAt(b.startHash)
+                                .endAt(b.endHash)
+                            tasks.add(q.get())
+                        }
+                        Tasks.whenAllComplete(tasks)
+                            .addOnCompleteListener {
+                                val matchingDocuments: MutableList<DocumentSnapshot> = ArrayList()
+                                for (task in tasks) {
+                                    val snap = task.result
+                                    for (doc in snap!!.documents) {
+                                        val lat = doc.getString("latitude")!!
+                                        val lng = doc.getString("longitude")!!
+                                        val docLocation =
+                                            GeoLocation(lat.toDouble(), lng.toDouble())
+                                        val distance =
+                                            GeoFireUtils.getDistanceBetween(docLocation, center)
+                                        if (distance <= radius)
+                                            matchingDocuments.add(doc)
+                                    }
+
+                                    for (document in matchingDocuments) {
+                                        var data = document.getData()
+                                        var grades = HashMap<String, Double>()
+                                        if (data?.get("grades") != null) {
+                                            for (g in data["grades"] as HashMap<String, Double>)
+                                                grades[g.key] = g.value
+                                        }
+                                        var comments = HashMap<String, String>()
+                                        if (data?.get("comments") != null) {
+
+
+                                            for (c in data["comments"] as HashMap<String, String>)
+                                                comments[c.key] = c.value
+                                        }
+
+                                        var url: String =
+                                            "places/" + document.getString("name") + data?.get("latitude")
+                                                .toString() + data?.get("longitude")
+                                                .toString() + ".jpg"
+                                        myPlacesViewModel
+                                            .addPlace(
+                                                MyPlaces(
+                                                    data?.get("name").toString(),
+                                                    data?.get("description").toString(),
+                                                    data?.get("latitude").toString(),
+                                                    data?.get("longitude").toString(),
+                                                    data?.get("autor").toString(),
+                                                    grades,
+                                                    comments,
+                                                    url,
+                                                    data?.get("category").toString(),
+                                                    ""
+                                                )
+                                            )
+
+                                    }
+
+                                    setupMap(myPlacesViewModel.myPlacesList)
+                                }
+                            }
+
+                    } else
+                        if (field.equals("grade")) {
+                            result = withContext(Dispatchers.IO) {
+                                db.collection("places")
+
+                                    .get()
+                                    .await()
+
+                            }
+                            for (document in result) {
+                                var data = document.data
+                                var grades = java.util.HashMap<String, Double>()
+                                var sum: Double = 0.0
+                                if (data["grades"] != null) {
+                                    for (g in data["grades"] as java.util.HashMap<String, Double>) {
+                                        grades[g.key] = g.value
+                                        sum += g.value
+                                    }
+                                    sum /= grades.size
+
+                                }
+                                var comments = kotlin.collections.HashMap<String, String>()
+                                if (data["comments"] != null) {
+                                    for (c in data["comments"] as kotlin.collections.HashMap<String, String>)
+                                        comments[c.key] = c.value
+                                }
+
+                                var url: String =
+                                    "places/" + data["name"] + data["latitude"].toString() + data["longitude"].toString() + ".jpg"
+                                if (sum >= value.toDouble())
+                                    myPlacesViewModel
+                                        .addPlace(
+                                            MyPlaces(
+                                                data["name"].toString(),
+                                                data["description"].toString(),
+                                                data["latitude"].toString(),
+                                                data["longitude"].toString(),
+                                                data["autor"].toString(),
+                                                grades,
+                                                comments,
+                                                url,
+                                                data["category"].toString(),
+                                                document.id
+
+                                            )
+                                        )
+
+                            }
+
+                            setupMap(myPlacesViewModel.myPlacesList)
+
+                        } else {
+                            if (type == 0) {
+                                result = withContext(Dispatchers.IO) {
+                                    db.collection("places")
+                                        .whereEqualTo(field, value)
+
+                                        .get()
+                                        .await()
+
+                                }
+
+                            } else {
+                                result = withContext(Dispatchers.IO) {
+                                    db.collection("places")
+                                        .whereGreaterThanOrEqualTo(field, value)
+
+                                        .get()
+                                        .await()
+                                }
+
+                            }
+                            myPlacesViewModel.myPlacesList.addAll(createList(result))
+
+                            setupMap(myPlacesViewModel.myPlacesList)
+                        }
+                } catch (e: java.lang.Exception) {
+                    Log.w("TAGA", "Greska", e)
+                }
+            }
+
+
+        }
+
+    }
+
+
     private fun setMyLocationOverlay(){
         var myLocationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(activity), map)
         myLocationOverlay.enableMyLocation()
         map.overlays.add(myLocationOverlay)
     }
     private val requestPermissionLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ){ isGranted: Boolean ->
-            if(isGranted){
-                setMyLocationOverlay()
-                setOnMapClickOverlay()
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                resetMap()
             }
         }
 
@@ -324,15 +497,31 @@ class MapFragment : Fragment(), ILocationClient {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        var item = menu.findItem(R.id.action_my_places_list)
-        item.isVisible = false;
-        item=menu.findItem(R.id.action_show_map)
+        var item=menu.findItem(R.id.action_show_map)
         item.isVisible = false;
     }
 
     override fun onResume() {
         super.onResume()
         map.onResume()
+
+        val searchView: SearchView = binding.svTable
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+
+
+                filterMap(searchType, query, 0)
+                return true
+            }
+
+
+            override fun onQueryTextChange(newText: String): Boolean {
+
+
+                filterMap(searchType, newText, 1)
+                return true
+            }
+        })
     }
 
     override fun onPause() {
@@ -346,6 +535,7 @@ class MapFragment : Fragment(), ILocationClient {
     }
 
     override fun onNewLocation(location: Location) {
-        TODO("Not yet implemented")
+        map.controller.animateTo(GeoPoint(location.latitude, location.longitude))
+        myMarker.position = GeoPoint(location.latitude, location.longitude)
     }
 }

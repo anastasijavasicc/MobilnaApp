@@ -56,4 +56,5 @@
     <string name="list_fragment_grade_rb">Grade</string>
     <string name="list_fragment_ok_btn">Ok</string>
     <string name="list_fragment_reset_label">Reset</string>
+    <string name="list_fragment_radius_rb">Radius</string>
 </resources>

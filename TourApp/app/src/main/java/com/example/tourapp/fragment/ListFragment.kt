@@ -1,4 +1,4 @@
-package com.example.tourapp
+package com.example.tourapp.fragment
 
 import android.os.Bundle
 import android.util.Log
@@ -10,8 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView.AdapterContextMenuInfo
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.example.tourapp.R
 import com.example.tourapp.data.MyPlaces
 import com.example.tourapp.data.User
 import com.example.tourapp.data.UserObject

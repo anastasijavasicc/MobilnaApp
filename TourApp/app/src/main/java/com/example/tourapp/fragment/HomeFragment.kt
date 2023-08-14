@@ -1,9 +1,10 @@
-package com.example.tourapp
+package com.example.tourapp.fragment
 
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.tourapp.R
 import com.example.tourapp.databinding.FragmentHomeBinding
 
 /**

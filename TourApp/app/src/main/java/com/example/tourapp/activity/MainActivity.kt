@@ -1,23 +1,20 @@
-package com.example.tourapp
+package com.example.tourapp.activity
 
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
-import android.view.WindowManager
-import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.example.tourapp.About
+import com.example.tourapp.R
 import com.example.tourapp.data.ILocationClient
 import com.example.tourapp.data.LocationClient
 import com.example.tourapp.databinding.ActivityMainBinding
-import com.google.android.material.textfield.TextInputLayout
 
 class MainActivity : AppCompatActivity(), ILocationClient {
 
@@ -55,9 +52,9 @@ class MainActivity : AppCompatActivity(), ILocationClient {
         binding.fab.setOnClickListener { view ->
             if (navController.currentDestination?.id == R.id.HomeFragment)
                 navController.navigate(R.id.action_HomeFragment_to_EditFragment)
-            else if(navController.currentDestination?.id ==R.id.ListFragment)
+            else if(navController.currentDestination?.id == R.id.ListFragment)
                 navController.navigate(R.id.action_ListFragment_to_EditFragment)
-            else if(navController.currentDestination?.id ==R.id.MapFragment)
+            else if(navController.currentDestination?.id == R.id.MapFragment)
                 navController.navigate(R.id.action_MapFragment_to_EditFragment)
            // Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
               //  .setAction("Action", null).show()

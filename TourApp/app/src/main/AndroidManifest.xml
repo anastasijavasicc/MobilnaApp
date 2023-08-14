@@ -21,13 +21,13 @@
             android:exported="false"
             android:label="MyPlacesList"
             android:theme="@style/Theme.TourApp.NoActionBar"
-            android:parentActivityName="com.example.tourapp.MainActivity">
+            android:parentActivityName="com.example.tourapp.activity.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.tourapp.MainActivity"/>
+                android:value="com.example.tourapp.activity.MainActivity"/>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.TourApp.NoActionBar">

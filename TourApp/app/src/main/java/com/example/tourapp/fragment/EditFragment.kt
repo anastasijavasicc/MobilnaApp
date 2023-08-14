@@ -1,4 +1,4 @@
-package com.example.tourapp
+package com.example.tourapp.fragment
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -24,6 +24,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import com.example.tourapp.R
+import com.example.tourapp.activity.MainActivity
 import com.example.tourapp.data.MyPlaces
 import com.example.tourapp.data.UserObject
 import com.example.tourapp.databinding.FragmentListBinding

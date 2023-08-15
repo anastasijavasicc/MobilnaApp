@@ -29,7 +29,7 @@ class MyPlacesListAdapter(context: Context, private val itemList: ArrayList<MyPl
 
         holder.itemTitle.text = item.name
         holder.itemAutor.text = item.autor
-        holder.itemTip.text = item.tip
+        holder.itemTip.text = item.category
 
         var sum:Double = 0.0
         for (el in item.grades!!)

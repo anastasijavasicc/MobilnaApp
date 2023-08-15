@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "806670833809",
+    "project_id": "tourapp-f60cd",
+    "storage_bucket": "tourapp-f60cd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:806670833809:android:923a69e8b63c9c89a48730",
+        "android_client_info": {
+          "package_name": "com.example.tourapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "806670833809-8b8p3vdlnavmu6mh90gevdugim15ooev.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjs4npdgmY6DuxtX37FqtgEHNVsKVHcHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "806670833809-8b8p3vdlnavmu6mh90gevdugim15ooev.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

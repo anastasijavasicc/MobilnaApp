@@ -1,57 +1,203 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.ViewFragment"
-    android:orientation = "vertical" >
+    tools:context=".fragment.ViewFragment">
 
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <TextView
-        android:layout_width="fill_parent"
+        android:id="@+id/tvName"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_margin="40px"
+        android:layout_marginStart="32dp"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:text="@string/editmyplace_name_label" />
     <TextView
         android:id="@+id/viewmyplace_name_text"
-        android:layout_width="fill_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="10px"
+        android:layout_marginEnd="40px"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvName"
         />
 
     <TextView
-        android:layout_width="fill_parent"
+        android:id="@+id/tvAutor"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/editmyplace_desc_label" />
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="10px"
+        android:layout_marginEnd="40px"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/viewmyplace_name_text"
+        android:text="@string/editmyplace_autor_label" />
+
+    <TextView
+        android:id="@+id/viewmyplace_autor_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="10px"
+        android:layout_marginEnd="40px"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvAutor" />
+    <TextView
+        android:id="@+id/tvDesc"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="Description:"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/viewmyplace_autor_text" />
 
     <TextView
         android:id="@+id/viewmyplace_desc_text"
-        android:layout_width="fill_parent"
-        android:layout_height="83dp"
-        android:layout_weight="1" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40px"
+        android:layout_marginTop="10px"
+        android:layout_marginEnd="40px"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvDesc" />
+    <TextView
+        android:id="@+id/tvCategory"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="Category:"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/viewmyplace_desc_text" />
 
     <TextView
-        android:layout_width="fill_parent"
+        android:id="@+id/viewmyplace_category_text"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/editmyplace_longitude_label" />
+
+        android:layout_marginStart="16dp"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvCategory" />
+    <TextView
+        android:id="@+id/tvGrade"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="Grade:"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/viewmyplace_category_text" />
+    <TextView
+        android:id="@+id/tvKomm"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:maxLines="3"
+        android:text="Comment:"
+        android:textSize="18sp"
+        android:verticalScrollbarPosition="defaultPosition"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ratingBar2" />
+
+    <ListView
+        android:id="@+id/viewFragmentListView"
+        android:layout_width="0dp"
+        android:layout_height="140dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toTopOf="@id/tvLongitude"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvKomm" />
+
+    <Button
+        android:id="@+id/ViewFragmentClose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="60px"
+        android:text="@string/viewmyplace_finished_label"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <RatingBar
+        android:id="@+id/ratingBar2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvGrade" />
+
+    <TextView
+        android:id="@+id/tvLongitude"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+
+        android:layout_marginStart="16dp"
+        android:text="Longitude:"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/viewFragmentListView"
+        />
 
     <TextView
         android:id="@+id/viewmyplace_long_text"
-        android:layout_width="fill_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1" />
+
+        android:layout_marginStart="16dp"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvLongitude"/>
     <TextView
-        android:layout_width="fill_parent"
+        android:id="@+id/tvLatitude"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/editmyplace_latitude_label" />
+
+        android:layout_marginStart="16dp"
+        android:text="Latitude:"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/viewmyplace_long_text" />
 
     <TextView
         android:id="@+id/viewmyplace_lat_text"
-        android:layout_width="fill_parent"
-        android:layout_height="245dp"
-        android:layout_weight="1" />
-    <Button
-        android:id="@+id/viewmyplace_finished_button"
-        android:layout_width="fill_parent"
-        android:layout_height="45dp"
-        android:layout_weight="1"
-        android:text="@string/viewmyplace_finished_label" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
 
-</LinearLayout>
+        android:layout_marginStart="16dp"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvLatitude"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

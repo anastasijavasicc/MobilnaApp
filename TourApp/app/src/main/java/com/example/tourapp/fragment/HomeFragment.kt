@@ -39,7 +39,7 @@ class HomeFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId){
-            R.id.action_my_places_list -> {
+            R.id.action_users -> {
                 this.findNavController().navigate(R.id.action_HomeFragment_to_ListFragment)
                 true
             }

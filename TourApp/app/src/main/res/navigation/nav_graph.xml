@@ -39,6 +39,9 @@
         <action
             android:id="@+id/action_ListFragment_to_UsersFragment"
             app:destination="@id/UsersFragment" />
+        <action
+            android:id="@+id/action_ListFragment_to_RankFragment"
+            app:destination="@id/RankFragment" />
     </fragment>
     <fragment
         android:id="@+id/EditFragment"
@@ -48,6 +51,9 @@
         <action
             android:id="@+id/action_EditFragment_to_MapFragment"
             app:destination="@id/MapFragment"/>
+        <action
+            android:id="@+id/action_EditFragment_to_ListFragment"
+            app:destination="@id/ListFragment" />
     </fragment>
     <fragment
         android:id="@+id/ViewFragment"
@@ -67,6 +73,29 @@
         <action
             android:id="@+id/action_MapFragment_to_EditFragment"
             app:destination="@id/EditFragment" />
+        <action
+            android:id="@+id/action_MapFragment_to_ListFragment"
+            app:destination="@id/ListFragment" />
 
+    </fragment>
+    <fragment
+        android:id="@+id/RankFragment"
+        android:name="com.example.tourapp.fragment.RankFragment"
+        android:label="@string/rank_fragment_label"
+        tools:layout="@layout/fragment_rank">
+        <action
+            android:id="@+id/action_RankFragment_to_ListFragment"
+            app:destination="@id/ListFragment" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/UsersFragment"
+        android:name="com.example.tourapp.fragment.UsersFragment"
+        android:label="@string/users_fragment_label"
+        tools:layout="@layout/fragment_users">
+
+        <action
+            android:id="@+id/action_UsersFragment_to_ListFragment"
+            app:destination="@id/ListFragment" />
     </fragment>
 </navigation>

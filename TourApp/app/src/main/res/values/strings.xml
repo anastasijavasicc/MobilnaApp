@@ -57,4 +57,13 @@
     <string name="list_fragment_ok_btn">Ok</string>
     <string name="list_fragment_reset_label">Reset</string>
     <string name="list_fragment_radius_rb">Radius</string>
+
+    <string name="rank_fragment_label">Rank</string>
+
+    <string name="users_fragment_label">Users</string>
+    <string name="popup_menu_view">View</string>
+    <string name="popup_menu_edit">Edit</string>
+    <string name="popup_menu_show">Show</string>
+    <string name="popup_menu_rank">Rank</string>
+    <string name="users_list">Users</string>
 </resources>

@@ -43,14 +43,18 @@ class MainActivity : AppCompatActivity(), ILocationClient {
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         navController.addOnDestinationChangedListener{controller, destination, arguments ->
-            if(destination.id == R.id.EditFragment || destination.id == R.id.ViewFragment)
+            if(destination.id == R.id.EditFragment || destination.id == R.id.ViewFragment || destination.id == R.id.UsersFragment)
                 binding.fab.hide()
             else
                 binding.fab.show()
         }
 
         binding.fab.setOnClickListener { view ->
-            if (navController.currentDestination?.id == R.id.HomeFragment)
+            if (navController.currentDestination?.id == R.id.ListFragment)
+                navController.navigate(R.id.action_ListFragment_to_EditFragment)
+            else if (navController.currentDestination?.id == R.id.MapFragment)
+                navController.navigate(R.id.action_MapFragment_to_EditFragment)
+           /** if (navController.currentDestination?.id == R.id.HomeFragment)
                 navController.navigate(R.id.action_HomeFragment_to_EditFragment)
             else if(navController.currentDestination?.id == R.id.ListFragment)
                 navController.navigate(R.id.action_ListFragment_to_EditFragment)
@@ -58,6 +62,7 @@ class MainActivity : AppCompatActivity(), ILocationClient {
                 navController.navigate(R.id.action_MapFragment_to_EditFragment)
            // Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
               //  .setAction("Action", null).show()
+           */
         }
     }
 
@@ -75,21 +80,23 @@ class MainActivity : AppCompatActivity(), ILocationClient {
         // as you specify a parent activity in AndroidManifest.xml.
         when (item.itemId) {
             R.id.action_show_map -> {
-                if(navController.currentDestination?.id == R.id.HomeFragment)
+                if (navController.currentDestination?.id == R.id.ListFragment)
+                    navController.navigate(R.id.action_ListFragment_to_MapFragment)
+              /**  if(navController.currentDestination?.id == R.id.HomeFragment)
                     navController.navigate(R.id.action_HomeFragment_to_MapFragment)
                 else if (navController.currentDestination?.id == R.id.ListFragment)
                     navController.navigate(R.id.action_ListFragment_to_MapFragment)
-
+            */
 
             }
           //  R.id.action_new_place -> Toast.makeText(this, "New Place!", Toast.LENGTH_SHORT).show()
           //  R.id.action_my_places_list -> {
             //  this.findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.action_HomeFragment_to_ListFragment)
             //}
-            R.id.action_about -> {
+           /** R.id.action_about -> {
                 val i: Intent = Intent(this, About::class.java)
                 startActivity(i)
-            }
+            }*/
 
         }
         return super.onOptionsItemSelected(item)
@@ -98,7 +105,7 @@ class MainActivity : AppCompatActivity(), ILocationClient {
     }
 
     override fun onDestroy() {
-       // locationClient?.stop()
+        locationClient?.stop()
         super.onDestroy()
     }
 

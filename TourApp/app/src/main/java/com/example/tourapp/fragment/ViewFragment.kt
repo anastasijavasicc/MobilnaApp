@@ -5,11 +5,13 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.tourapp.R
 import com.example.tourapp.databinding.FragmentViewBinding
 import com.example.tourapp.model.MyPlacesViewModel
+import java.util.ArrayList
 
 
 class ViewFragment : Fragment() {
@@ -38,10 +40,27 @@ class ViewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.viewmyplaceNameText.text = myPlacesViewModel.selected?.name
         binding.viewmyplaceDescText.text = myPlacesViewModel.selected?.description
+        binding.viewmyplaceAutorText.text = myPlacesViewModel.selected?.autor
         binding.viewmyplaceLongText.text = myPlacesViewModel.selected?.longitude
         binding.viewmyplaceLatText.text = myPlacesViewModel.selected?.latitude
+        binding.viewmyplaceCategoryText.text = myPlacesViewModel.selected?.category
         //myPlacesViewModel.selected = null
-        binding.viewmyplaceFinishedButton.setOnClickListener{
+
+        var sum:Double = 0.0
+        for (el in myPlacesViewModel.selected?.grades!!)
+            sum += el.value
+        if (myPlacesViewModel.selected?.grades!!.size!= 0)
+            sum /= myPlacesViewModel.selected?.grades!!.size
+        binding.ratingBar2.rating = sum.toFloat()
+
+        var s: ArrayList<String> = ArrayList()
+        for (el in myPlacesViewModel.selected?.comments!!)
+            s.add(el.value)
+        binding.viewFragmentListView.adapter=
+            ArrayAdapter<String>(requireContext(),android.R.layout.simple_list_item_1,s)
+
+
+        binding.ViewFragmentClose.setOnClickListener{
             myPlacesViewModel.selected = null
             findNavController().navigate(R.id.action_ViewFragment_to_ListFragment)
         }

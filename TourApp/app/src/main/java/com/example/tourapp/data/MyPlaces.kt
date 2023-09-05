@@ -10,6 +10,7 @@ data class MyPlaces(var name:String,
                     var url:String,
                     var category: String,
                     @Transient var id:String){
+    constructor() : this("", "", "", "", "", HashMap(), HashMap(), "", "", "")
     override fun toString(): String = name
 
     fun addGrade(username:String,grade:Double){

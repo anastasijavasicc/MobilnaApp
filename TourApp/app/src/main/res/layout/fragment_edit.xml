@@ -7,7 +7,15 @@
     tools:context=".fragment.EditFragment"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <LinearLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/background"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout3" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/linearLayout3"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -15,67 +23,76 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="205dp"
+        android:layout_marginBottom="170dp"
         android:orientation="vertical"
         android:textAlignment="center"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/EditFragmentGradesTV"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="242dp"
-            android:layout_height="wrap_content"
-            android:text="@string/editmyplace_name_label" />
-
-        <EditText
-            android:id="@+id/editmyplace_name_edit"
-            android:layout_width="242dp"
-            android:layout_height="36dp"
-            android:minHeight="48dp" />
-
-        <TextView
-            android:id="@+id/textViewCategory"
-            android:layout_width="242dp"
-            android:layout_height="wrap_content"
-            android:text="@string/editmyplace_category_label" />
-
-        <EditText
-            android:id="@+id/editmyplace_category_edit"
-            android:layout_width="242dp"
-            android:layout_height="36dp"
-            android:minHeight="48dp" />
-
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="243dp"
-            android:layout_height="wrap_content"
-            android:text="@string/editmyplace_desc_label" />
-
-        <EditText
-            android:id="@+id/editmyplace_desc_edit"
-            android:layout_width="242dp"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp" />
-
-        <TextView
-            android:id="@+id/textViewAutor"
-            android:layout_width="242dp"
-            android:layout_height="wrap_content"
-            android:text="@string/editmyplace_autor_label" />
-
-        <EditText
-            android:id="@+id/editmyplace_autor_edit"
-            android:layout_width="242dp"
-            android:layout_height="36dp"
-            android:minHeight="48dp" />
-
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/labels_cons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp">
+            app:layout_constraintBottom_toTopOf="@id/pic_cons"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <EditText
+                android:id="@+id/editmyplace_name_edit"
+                android:layout_width="242dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="20dp"
+                android:hint="@string/editmyplace_name_label"
+                android:minHeight="48dp"
+                app:layout_constraintBottom_toTopOf="@id/editmyplace_category_edit"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.109" />
+
+            <EditText
+                android:id="@+id/editmyplace_category_edit"
+                android:layout_width="242dp"
+                android:layout_height="40dp"
+                android:hint="@string/editmyplace_category_label"
+                android:minHeight="48dp"
+                app:layout_constraintBottom_toTopOf="@id/editmyplace_desc_edit"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/editmyplace_name_edit" />
+
+
+            <EditText
+                android:id="@+id/editmyplace_desc_edit"
+                android:layout_width="242dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/editmyplace_desc_label"
+                android:minHeight="48dp"
+                app:layout_constraintBottom_toTopOf="@id/editmyplace_autor_edit"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/editmyplace_category_edit" />
+
+
+            <EditText
+                android:id="@+id/editmyplace_autor_edit"
+                android:layout_width="242dp"
+                android:layout_height="40dp"
+                android:hint="@string/editmyplace_autor_label"
+                android:minHeight="48dp"
+                app:layout_constraintStart_toStartOf="@id/editmyplace_desc_edit"
+                app:layout_constraintTop_toBottomOf="@id/editmyplace_desc_edit" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/pic_cons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/ll_cons"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labels_cons">
 
             <ImageView
                 android:id="@+id/EditFragmentImg"
@@ -88,24 +105,25 @@
                 android:minWidth="120dp"
                 android:minHeight="30dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_launcher_background" />
+                android:src="@drawable/ic_launcher_background"
+                tools:ignore="MissingConstraints" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/linearLayout"
-                android:layout_width="254dp"
+                android:id="@+id/cam_cons"
+                android:layout_width="370dp"
                 android:layout_height="match_parent"
-                android:layout_marginEnd="10dp"
                 android:layout_weight="1"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toStartOf="@id/EditFragmentImg"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <Button
                     android:id="@+id/btnCamera"
                     android:layout_width="100dp"
                     android:layout_height="45dp"
+                    android:layout_marginStart="140dp"
                     android:layout_marginTop="10dp"
                     android:text="@string/edit_fragment_camera_btn"
                     app:autoSizeTextType="uniform"
@@ -119,97 +137,104 @@
                     android:id="@+id/btnGalerija"
                     android:layout_width="100dp"
                     android:layout_height="45dp"
-                    android:layout_marginStart="28dp"
                     android:layout_marginTop="10dp"
                     android:text="@string/edit_fragment_galery_btn"
                     app:autoSizeTextType="uniform"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/btnCamera"
                     app:layout_constraintTop_toBottomOf="@+id/btnCamera" />
             </androidx.constraintlayout.widget.ConstraintLayout>
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/ll_cons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="bottom"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/pic_cons">
 
             <LinearLayout
-                android:layout_width="339dp"
+                android:id="@+id/ll_l"
+                android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="bottom"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/textView4"
-                    android:layout_width="243dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/editmyplace_longitude_label" />
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/editmyplace_location_button"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <EditText
                     android:id="@+id/editmyplace_longitude_label"
                     android:layout_width="242dp"
-                    android:layout_height="36dp" />
-
-                <TextView
-                    android:id="@+id/textView5"
-                    android:layout_width="242dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/editmyplace_latitude_label" />
+                    android:layout_height="40dp"
+                    android:hint="Longitude" />
 
                 <EditText
                     android:id="@+id/editmyplace_latitude_label"
                     android:layout_width="241dp"
-                    android:layout_height="36dp" />
+                    android:layout_height="40dp"
+                    android:hint="Latitude" />
             </LinearLayout>
 
             <Button
                 android:id="@+id/editmyplace_location_button"
-                android:layout_width="318dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginStart="30dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="15dp"
                 android:layout_weight="2"
-                android:text="@string/editmyplace_button_set_coordinates" />
-        </LinearLayout>
+                android:text="@string/editmyplace_button_set_coordinates"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ll_l"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="bottom"
-            android:orientation="horizontal">
-
-
-        </LinearLayout>
-
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <Button
         android:id="@+id/editmyplace_finished_button"
         android:layout_width="120dp"
         android:layout_height="45dp"
-        android:layout_marginBottom="30dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="42dp"
+        android:layout_marginBottom="20dp"
         android:layout_weight="1"
         android:text="@string/editmyplace_add_label"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="55dp"
+        app:layout_constraintEnd_toStartOf="@+id/editmyplace_cancel_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ratingBar"
         tools:ignore="MissingConstraints" />
 
     <Button
         android:id="@+id/editmyplace_cancel_button"
         android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="30dp"
+        android:layout_marginStart="42dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="20dp"
         android:layout_weight="1"
         android:text="@string/editmyplace_cancel_label"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="259dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/editmyplace_finished_button"
+        app:layout_constraintTop_toBottomOf="@+id/ratingBar"
         tools:ignore="MissingConstraints" />
 
     <TextView
@@ -220,6 +245,7 @@
 
         android:text="@string/edit_fragment_ocena_label"
         android:textSize="18dp"
+        app:layout_constraintBottom_toTopOf="@+id/ratingBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.482"
         app:layout_constraintStart_toStartOf="parent"
@@ -229,10 +255,10 @@
         android:id="@+id/ratingBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/editmyplace_cancel_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/EditFragmentGradesTV"
-         />
+        app:layout_constraintTop_toBottomOf="@+id/EditFragmentGradesTV" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -29,7 +29,9 @@
     </string>
     <string name="ok">OK</string>
     <string name="title_activity_my_places_list">MyPlacesList</string>
-    <!-- TODO: Remove or change this placeholder text -->
+    <string name="home">Home</string>
+    <string name="map">Map</string>
+    <string name="profile">Profile</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="register_activity_username_label">Username:</string>
     <string name="register_activity_password_label">Password:</string>
@@ -38,8 +40,9 @@
     <string name="register_activity_telefon_label">Phone number:</string>
     <string name="register_activity_kamera_btn">Camera</string>
     <string name="register_activity_galerija_btn">Galery</string>
-    <string name="register_activity_ok_btn">Ok</string>
+    <string name="register_activity_ok_btn">Create</string>
     <string name="register_activity_close_btn">Close</string>
+    <string name="register_activity_email_label">Email:</string>
     <string name="login_activity_login_button">Login</string>
     <string name="login_activity_register_button">Register</string>
     <string name="login_activity_username_label">Username:</string>
@@ -66,4 +69,15 @@
     <string name="popup_menu_show">Show</string>
     <string name="popup_menu_rank">Rank</string>
     <string name="users_list">Users</string>
+    <string name="rank_comment">Comment</string>
+    <string name="your_name">Your Name</string>
+    <string name="yourname">yourname</string>
+    <string name="your_email">Your Email</string>
+    <string name="youremail">youremail</string>
+    <string name="your_phone">Your Phone</string>
+    <string name="yourphone">yourphone</string>
+    <string name="your_points">Your Points</string>
+    <string name="yourpoints">yourpoints</string>
+    <string name="add_number">Add Number</string>
+    <string name="info">info</string>
 </resources>

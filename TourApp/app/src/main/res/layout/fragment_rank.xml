@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RankFragment">
+    tools:context=".fragment.RankFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -25,7 +25,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:text="Ocena:"
+            android:text="@string/edit_fragment_ocena_label"
             android:textSize="24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -46,7 +46,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:text="Komentar:"
+            android:text="@string/rank_comment"
             android:textSize="24dp"
             app:layout_constraintEnd_toStartOf="@+id/RankFragmentName"
             app:layout_constraintHorizontal_bias="0.0"
@@ -72,7 +72,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:text="Potvrdi"
+            android:text="@string/ok"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/RankFragmentbtnCancel"
             app:layout_constraintHorizontal_bias="0.367"
@@ -84,7 +84,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="68dp"
             android:layout_marginBottom="16dp"
-            android:text="ZATVORI"
+            android:text="@string/register_activity_close_btn"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 

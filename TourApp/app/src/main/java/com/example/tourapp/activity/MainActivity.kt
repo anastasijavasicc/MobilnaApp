@@ -1,10 +1,13 @@
 package com.example.tourapp.activity
 
+import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -15,6 +18,7 @@ import com.example.tourapp.R
 import com.example.tourapp.data.ILocationClient
 import com.example.tourapp.data.LocationClient
 import com.example.tourapp.databinding.ActivityMainBinding
+
 
 class MainActivity : AppCompatActivity(), ILocationClient {
 
@@ -35,35 +39,36 @@ class MainActivity : AppCompatActivity(), ILocationClient {
         binding = ActivityMainBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
-
         setSupportActionBar(binding.toolbar)
 
         navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
+
+        binding.fab?.show()
         navController.addOnDestinationChangedListener{controller, destination, arguments ->
             if(destination.id == R.id.EditFragment || destination.id == R.id.ViewFragment || destination.id == R.id.UsersFragment)
-                binding.fab.hide()
+                binding.fab?.hide()
             else
-                binding.fab.show()
+                binding.fab?.show()
         }
 
-        binding.fab.setOnClickListener { view ->
-            if (navController.currentDestination?.id == R.id.ListFragment)
+
+        binding.fab?.setOnClickListener { view ->
+            if (navController.currentDestination?.id == R.id.HomeFragment)
+               navController.navigate(R.id.action_HomeFragment_to_EditFragment)
+            else if (navController.currentDestination?.id == R.id.ListFragment)
                 navController.navigate(R.id.action_ListFragment_to_EditFragment)
             else if (navController.currentDestination?.id == R.id.MapFragment)
                 navController.navigate(R.id.action_MapFragment_to_EditFragment)
-           /** if (navController.currentDestination?.id == R.id.HomeFragment)
-                navController.navigate(R.id.action_HomeFragment_to_EditFragment)
-            else if(navController.currentDestination?.id == R.id.ListFragment)
-                navController.navigate(R.id.action_ListFragment_to_EditFragment)
-            else if(navController.currentDestination?.id == R.id.MapFragment)
-                navController.navigate(R.id.action_MapFragment_to_EditFragment)
+
            // Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
               //  .setAction("Action", null).show()
-           */
+
         }
+
+
     }
 
 
@@ -74,22 +79,98 @@ class MainActivity : AppCompatActivity(), ILocationClient {
       //  return true
   //  }
 
+    override fun onBackPressed() {
+        if (navController.currentDestination?.id == R.id.HomeFragment) {
+            navController.popBackStack(R.id.LoginFragment, false)
+        } else {
+            super.onBackPressed()
+        }
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        when (item.itemId) {
+
+
+       when (item.itemId) {
             R.id.action_show_map -> {
-                if (navController.currentDestination?.id == R.id.ListFragment)
-                    navController.navigate(R.id.action_ListFragment_to_MapFragment)
-              /**  if(navController.currentDestination?.id == R.id.HomeFragment)
-                    navController.navigate(R.id.action_HomeFragment_to_MapFragment)
-                else if (navController.currentDestination?.id == R.id.ListFragment)
-                    navController.navigate(R.id.action_ListFragment_to_MapFragment)
-            */
+
+                when (navController.currentDestination?.id) {
+                    R.id.HomeFragment -> {
+                        navController.navigate(R.id.action_HomeFragment_to_MapFragment)
+                    }
+                    R.id.ListFragment -> {
+                        navController.navigate(R.id.action_ListFragment_to_MapFragment)
+                    }
+                    R.id.ProfileFragment -> {
+                        navController.navigate(R.id.action_ProfileFragment_to_MapFragment)
+                    }
+                    R.id.UsersFragment -> {
+                        navController.navigate(R.id.action_UsersFragment_to_MapFragment)
+                    }
+                }
+                //Toast.makeText(this,"Show map!", Toast.LENGTH_SHORT).show()
 
             }
-          //  R.id.action_new_place -> Toast.makeText(this, "New Place!", Toast.LENGTH_SHORT).show()
+           R.id.loginBtnLog -> {
+               if (navController.currentDestination?.id == R.id.LoginFragment)
+                   navController.navigate(R.id.action_LoginFragment_to_HomeFragment)
+           }
+           R.id.loginbtnRegister -> {
+               if (navController.currentDestination?.id == R.id.LoginFragment)
+                   navController.navigate(R.id.action_LoginFragment_to_RegisterFragment)
+           }
+            R.id.menu_logout -> {
+                when (navController.currentDestination?.id) {
+                    R.id.HomeFragment -> {
+                        navController.navigate(R.id.action_HomeFragment_to_LoginFragment)
+                    }
+                    R.id.MapFragment -> {
+                        navController.navigate(R.id.action_MapFragment_to_LoginFragment)
+                    }
+                    R.id.ListFragment -> {
+                        navController.navigate(R.id.action_ListFragment_to_LoginFragment)
+                    }
+                    R.id.UsersFragment -> {
+                        navController.navigate(R.id.action_UsersFragment_to_LoginFragment)
+                    }
+                }
+            }
+            R.id.menu_profile -> {
+                when (navController.currentDestination?.id) {
+                    R.id.HomeFragment -> {
+                        navController.navigate(R.id.action_HomeFragment_to_ProfileFragment)
+                    }
+                    R.id.MapFragment -> {
+                        navController.navigate(R.id.action_MapFragment_to_ProfileFragment)
+                    }
+                    R.id.ListFragment -> {
+                        navController.navigate(R.id.action_ListFragment_to_ProfileFragment)
+                    }
+                    R.id.UsersFragment -> {
+                        navController.navigate(R.id.action_UsersFragment_to_ProfileFragment)
+                    }
+                }
+            }
+            R.id.menu_leaderboard -> {
+                when (navController.currentDestination?.id) {
+                    R.id.HomeFragment -> {
+                        navController.navigate(R.id.action_HomeFragment_to_UsersFragment)
+                    }
+                    R.id.MapFragment -> {
+                        navController.navigate(R.id.action_MapFragment_to_UsersFragment)
+                    }
+                    R.id.ListFragment -> {
+                        navController.navigate(R.id.action_ListFragment_to_UsersFragment)
+                    }
+                    R.id.ProfileFragment -> {
+                        navController.navigate(R.id.action_ProfileFragment_to_UsersFragment)
+                    }
+
+                }
+            }
+          R.id.action_new_place -> Toast.makeText(this, "New Place!", Toast.LENGTH_SHORT).show()
           //  R.id.action_my_places_list -> {
             //  this.findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.action_HomeFragment_to_ListFragment)
             //}

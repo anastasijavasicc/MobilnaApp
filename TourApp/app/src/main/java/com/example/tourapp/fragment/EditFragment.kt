@@ -6,35 +6,39 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Insets.add
+import com.google.android.gms.tasks.OnFailureListener
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.*
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.example.tourapp.R
 import com.example.tourapp.activity.MainActivity
 import com.example.tourapp.data.MyPlaces
+import com.example.tourapp.data.User
 import com.example.tourapp.data.UserObject
-import com.example.tourapp.databinding.FragmentListBinding
+import com.example.tourapp.databinding.FragmentEditBinding
 import com.example.tourapp.model.LocationViewModel
 import com.example.tourapp.model.MyPlacesViewModel
+import com.example.tourapp.viewmodels.LoggedUserViewModel
 import com.firebase.geofire.GeoFireUtils
 import com.firebase.geofire.GeoLocation
-import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
@@ -44,39 +48,41 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
-import java.util.*
 
 
-/**
- * A simple [Fragment] subclass.
- * Use the [EditFragment.newInstance] factory method to
- * create an instance of this fragment.
-*/
 class EditFragment : Fragment() {
 
-
-    private var _binding: FragmentListBinding? = null
-
+    private var _binding: FragmentEditBinding? = null
     private val binding get() = _binding!!
     private val myPlacesViewModel: MyPlacesViewModel by activityViewModels()
     private val locationViewModel: LocationViewModel by activityViewModels()
 
-    //ostali
+    // Ostalo
     private var CAMERA_REQUEST_CODE: Int = 0
     private var GALLERY_REQUEST_CODE: Int = 0
-    private val db = Firebase.firestore
-    private var storage = Firebase.storage
-    var storageRef = storage.reference
-    var userName: String = UserObject.username!!
+    private val db = FirebaseDatabase.getInstance("https://tourapp-f60cd-default-rtdb.firebaseio.com/")
+    private val storage = Firebase.storage
+    private var storageRef = storage.reference
+    private lateinit var databasePlace: DatabaseReference
 
-    override fun onCreate(savedInstanceState: Bundle?){
+    private val loggedUserViewModel: LoggedUserViewModel by activityViewModels()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     @SuppressLint("SuspiciousIndentation")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Ovo sam dodala
+        val user = loggedUserViewModel.user
+        var userName: String = ""
+        if (user != null) {
+            userName = user.username
+        }
 
         var addButton: Button = requireView().findViewById(R.id.editmyplace_finished_button)
 
@@ -96,16 +102,12 @@ class EditFragment : Fragment() {
         }
         locationViewModel.latitude.observe(viewLifecycleOwner, latObserver)
 
-        //dodato
+        // Dodato
         val editAutor: EditText = requireView().findViewById<EditText>(R.id.editmyplace_autor_edit)
         val ratGrade: RatingBar = requireView().findViewById(R.id.ratingBar)
-
-
-
         //
 
-
-        if(myPlacesViewModel.selected != null){
+        if (myPlacesViewModel.selected != null) {
             addButton.isEnabled = true
             editName.setText(myPlacesViewModel.selected?.name)
             editDesc.setText(myPlacesViewModel.selected?.description)
@@ -114,9 +116,9 @@ class EditFragment : Fragment() {
             editCategory.setText(myPlacesViewModel.selected?.category)
             editAutor.setText(myPlacesViewModel.selected?.autor)
             var sum = 0.0
-            for(g in myPlacesViewModel.selected?.grades!!)
-                sum+=g.value
-            if(myPlacesViewModel.selected?.grades!!.size !=0)
+            for (g in myPlacesViewModel.selected?.grades!!)
+                sum += g.value
+            if (myPlacesViewModel.selected?.grades!!.size != 0)
                 sum /= myPlacesViewModel.selected?.grades!!.size
 
             ratGrade.rating = sum.toFloat()
@@ -124,7 +126,7 @@ class EditFragment : Fragment() {
             addButton.setText(R.string.edit_fragment_save_label)
             editAutor.isEnabled = false
             ratGrade.isEnabled = false
-        }else {
+        } else {
 
             addButton.isEnabled = false
             val location = MainActivity.currentLocation
@@ -152,11 +154,12 @@ class EditFragment : Fragment() {
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 }
-
             })
-            editAutor.setText(userName)
+            if (user != null) {
+                editAutor.setText(userName)
+            }
         }
-        addButton.setOnClickListener{
+        addButton.setOnClickListener {
             val name: String = editName.text.toString()
             val desc: String = editDesc.text.toString()
             val longitude: String = editLongitude.text.toString()
@@ -166,41 +169,41 @@ class EditFragment : Fragment() {
             var kommCount = 0L
             val grades = HashMap<String, Double>()
             val category = editCategory.text.toString()
-            if (ratGrade.rating.toDouble() != 0.0) {
+            if (ratGrade.rating.toDouble() != 0.0 && user != null) {
                 grades[userName] = ratGrade.rating.toDouble()
                 starsCount += 2
             }
 
-            if(myPlacesViewModel.selected != null){
+            if (myPlacesViewModel.selected != null) {
                 myPlacesViewModel.selected?.name = name
                 myPlacesViewModel.selected?.description = desc
                 myPlacesViewModel.selected?.longitude = longitude
                 myPlacesViewModel.selected?.latitude = latitude
 
-                val documentRef = db.collection("places").document(myPlacesViewModel.selected!!.id)
+                val documentRef = db.getReference("places").child(myPlacesViewModel.selected!!.id)
 
                 val place = hashMapOf(
                     "name" to name,
                     "latitude" to latitude,
                     "longitude" to longitude,
                     "description" to desc,
-                    "category" to category,
-                    )
+                    "category" to category
+                )
                 var fragmentContext = requireContext()
-                documentRef.update(place as Map<String, Any>)
+                documentRef.updateChildren(place as Map<String, Any>)
                     .addOnSuccessListener {
+                        Navigation.findNavController(binding.root).navigate(R.id.action_EditFragment_to_HomeFragment)
                         Toast.makeText(
                             fragmentContext,
                             "Uspesno izmenjeni podaci o mestu",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
-                    .addOnFailureListener { exception ->
+                    ?.addOnFailureListener {
+                        Toast.makeText(fragmentContext, "Greška pri ažuriranju dokumenta", Toast.LENGTH_LONG).show()
 
-                        Log.e("TAG", "Greška pri ažuriranju dokumenta", exception)
                     }
-            }
-            else {
+            } else {
                 var Place =
                     MyPlaces(
                         name,
@@ -216,9 +219,7 @@ class EditFragment : Fragment() {
                     )
 
 
-                myPlacesViewModel.addPlace(
-                    Place
-                )
+                myPlacesViewModel.addPlace(Place)
                 val hash = GeoFireUtils.getGeoHashForLocation(
                     GeoLocation(
                         Place.latitude.toDouble(),
@@ -235,7 +236,7 @@ class EditFragment : Fragment() {
                     "url" to "",
                     "grades" to grades,
                     "geohash" to hash,
-                    "category" to category,
+                    "category" to category
                 )
 
                 var imageView: ImageView =
@@ -245,82 +246,60 @@ class EditFragment : Fragment() {
                 var context: Context = requireContext()
                 CoroutineScope(Dispatchers.Main).launch {
                     try {
-                        var result: QuerySnapshot
-                        result = withContext(Dispatchers.IO) {
-                            db.collection("places")
-                                .whereEqualTo("latitude", latitude)
-                                .whereEqualTo("longitude", longitude)
+                        val result = withContext(Dispatchers.IO) {
+                            val dataSnapshot = db.getReference("places")
+                                .orderByChild("longitude")
+                                .equalTo(longitude)
                                 .get()
                                 .await()
+
+                            val resultList = mutableListOf<MyPlaces>()
+
+                            dataSnapshot.children.forEach { data ->
+                                val place = data.getValue(MyPlaces::class.java)
+                                if (place != null && place.latitude == latitude) {
+                                    resultList.add(place)
+                                }
+                            }
+
+                            resultList
                         }
-                        if (result.isEmpty) {
-                            db.collection("places")
-                                .add(place)
-                                .addOnSuccessListener { documentReference ->
 
-                                    Place.id = documentReference.id.toString()
-                                    Place.url = "places/" + Place.id + ".jpg"
-                                    url = "places/" + Place.id + ".jpg"
-                                    var imageRef: StorageReference? =
-                                        storageRef.child("images/" + url)
-                                    var PlaceRef = storageRef.child(url)
+                        if (result.isEmpty()) {
+                            val newPlaceRef = db.getReference("places").push()
+                            newPlaceRef.setValue(place)
+                            Place.id = newPlaceRef.key.toString()
 
-                                    imageView.isDrawingCacheEnabled = true
-                                    imageView.buildDrawingCache()
+                            Place.url = "places/" + Place.id + ".jpg"
+                            url = "places/" + Place.id + ".jpg"
+                            var imageRef: StorageReference? =
+                                storageRef.child("images/" + url)
+                            var PlaceRef = storageRef.child(url)
 
-                                    if (imageView.drawable is BitmapDrawable) {
-                                        val bitmap = (imageView.drawable as BitmapDrawable).bitmap
-                                        val baos = ByteArrayOutputStream()
-                                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-                                        val data = baos.toByteArray()
-                                        var uploadTask = PlaceRef.putBytes(data)
-                                        uploadTask.addOnFailureListener { e ->
-                                            Log.w("TAGA", "Greska", e)
-                                        }
-                                    }
-                                    val documentRef = db.collection("places").document(Place.id)
-                                    val placeUrl = hashMapOf(
-                                        "url" to "places/" + Place.id + ".jpg"
-                                    )
+                            imageView.isDrawingCacheEnabled = true
+                            imageView.buildDrawingCache()
 
-                                    documentRef.update(placeUrl as Map<String, Any>)
-                                        .addOnSuccessListener {
-                                        }
-                                        .addOnFailureListener { exception ->
+                            if (imageView.drawable is BitmapDrawable) {
+                                val bitmap = (imageView.drawable as BitmapDrawable).bitmap
+                                val baos = ByteArrayOutputStream()
+                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+                                val data = baos.toByteArray()
+                                var uploadTask = PlaceRef.putBytes(data)
+                                uploadTask.addOnFailureListener { e ->
+                                    Log.w("TAGA", "Greska", e)
+                                }
+                            }
+                            val documentRef = db.getReference("places").child(Place.id)
+                            val placeUrl = hashMapOf(
+                                "url" to "places/" + Place.id + ".jpg"
+                            )
 
-                                        }
+                            documentRef.updateChildren(placeUrl as Map<String, Any>)
+                                .addOnSuccessListener {
+                                }
+                                .addOnFailureListener {
 
                                 }
-                                .addOnFailureListener { e ->
-                                    Log.w("TAGA", "Error", e)
-                                }
-
-                            db.collection("users")
-                                .whereEqualTo("username", userName)
-                                .get()
-                                .addOnSuccessListener { querySnapshot ->
-                                    for (documentSnapshot in querySnapshot.documents) {
-                                        val documentRef =
-                                            db.collection("users").document(documentSnapshot.id)
-                                        val addCount: Long =
-                                            documentSnapshot.get("addCount") as Long
-                                        starsCount += documentSnapshot.get("starsCount") as Long
-                                        val noviPodaci = hashMapOf<String, Any>(
-                                            "addCount" to (addCount + 3L).toString().toLong(),
-                                            "starsCount" to starsCount
-
-                                        )
-                                        documentRef.update(noviPodaci)
-                                            .addOnSuccessListener {
-
-                                            }
-                                            .addOnFailureListener { exception ->
-                                                Log.w("TAGA", "Error", exception)
-                                            }
-                                    }
-                                }
-                            myPlacesViewModel.selected = null
-                            findNavController().popBackStack()
                         } else
                             Toast.makeText(
                                 context,
@@ -328,20 +307,15 @@ class EditFragment : Fragment() {
                                 Toast.LENGTH_SHORT
                             ).show()
 
-                    } catch (e: java.lang.Exception) {
-                        Log.w("TAGA", "Greska", e)
+                    } catch (e: Exception) {
+                        Log.w("TAGA", "Greska krajnja", e)
                     }
                 }
-                // val editDesc: EditText = requireView().findViewById<EditText>(R.id.editmyplace_desc_edit)
-                // myPlacesViewModel.selected = null
-                // locationViewModel.setLocation("","")
-                // findNavController().popBackStack()
             }
         }
         val cancelButton: Button = requireView().findViewById<Button>(R.id.editmyplace_cancel_button)
-        cancelButton.setOnClickListener{
+        cancelButton.setOnClickListener {
             myPlacesViewModel.selected = null
-            //locationViewModel.setLocation("","")
             findNavController().popBackStack()
         }
 
@@ -349,7 +323,6 @@ class EditFragment : Fragment() {
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
                 if (isGranted) {
                     if (CAMERA_REQUEST_CODE == 1) {
-
                         startActivityForResult(
                             Intent(MediaStore.ACTION_IMAGE_CAPTURE),
                             CAMERA_REQUEST_CODE
@@ -383,7 +356,6 @@ class EditFragment : Fragment() {
                     ), GALLERY_REQUEST_CODE
                 )
             }
-
         }
 
         val cameraButton: Button = requireView().findViewById(R.id.btnCamera)
@@ -399,15 +371,7 @@ class EditFragment : Fragment() {
             } else {
                 startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), CAMERA_REQUEST_CODE)
             }
-
-
         }
-
-      //  val setButton: Button = requireView().findViewById<Button>(R.id.editmyplace_location_button)
-      //  setButton.setOnClickListener{
-      //      locationViewModel.setLocation = true;
-      //      findNavController().navigate(R.id.action_EditFragment_to_MapFragment)
-      //  }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -425,18 +389,24 @@ class EditFragment : Fragment() {
         }
     }
 
+
     override fun onDestroyView() {
         super.onDestroyView()
         myPlacesViewModel.selected = null
     }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_edit, container, false)
+        _binding = FragmentEditBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-
-
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
 }
+

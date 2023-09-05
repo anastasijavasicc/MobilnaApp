@@ -3,8 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/HomeFragment">
+    app:startDestination="@id/RegisterFragment">
 
+    <fragment
+        android:id="@+id/LoginFragment"
+        android:name="com.example.tourapp.fragment.LoginFragment"
+        android:label="@string/login_activity_login_button"
+        tools:layout="@layout/activity_login">
+        <action
+            android:id="@+id/action_LoginFragment_to_RegisterFragment"
+            app:destination="@id/RegisterFragment" />
+        <action
+            android:id="@+id/action_LoginFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
+
+    </fragment>
     <fragment
         android:id="@+id/HomeFragment"
         android:name="com.example.tourapp.fragment.HomeFragment"
@@ -20,6 +33,18 @@
         <action
             android:id="@+id/action_HomeFragment_to_MapFragment"
             app:destination="@id/MapFragment" />
+        <action
+            android:id="@+id/action_HomeFragment_to_ProfileFragment"
+            app:destination="@id/ProfileFragment" />
+        <action
+            android:id="@+id/action_HomeFragment_to_UsersFragment"
+            app:destination="@id/UsersFragment" />
+        <action
+            android:id="@+id/action_HomeFragment_to_LoginFragment"
+            app:destination="@id/LoginFragment" />
+        <action
+            android:id="@+id/action_HomeFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
     </fragment>
     <fragment
         android:id="@+id/ListFragment"
@@ -42,6 +67,15 @@
         <action
             android:id="@+id/action_ListFragment_to_RankFragment"
             app:destination="@id/RankFragment" />
+        <action
+            android:id="@+id/action_ListFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
+        <action
+            android:id="@+id/action_ListFragment_to_ProfileFragment"
+            app:destination="@id/ProfileFragment" />
+        <action
+            android:id="@+id/action_ListFragment_to_LoginFragment"
+            app:destination="@id/LoginFragment" />
     </fragment>
     <fragment
         android:id="@+id/EditFragment"
@@ -54,6 +88,9 @@
         <action
             android:id="@+id/action_EditFragment_to_ListFragment"
             app:destination="@id/ListFragment" />
+        <action
+            android:id="@+id/action_EditFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
     </fragment>
     <fragment
         android:id="@+id/ViewFragment"
@@ -76,6 +113,18 @@
         <action
             android:id="@+id/action_MapFragment_to_ListFragment"
             app:destination="@id/ListFragment" />
+        <action
+            android:id="@+id/action_MapFragment_to_ProfileFragment"
+            app:destination="@id/ProfileFragment" />
+        <action
+            android:id="@+id/action_MapFragment_to_UsersFragment"
+            app:destination="@id/UsersFragment" />
+        <action
+            android:id="@+id/action_MapFragment_to_LoginFragment"
+            app:destination="@id/LoginFragment" />
+        <action
+        android:id="@+id/action_MapFragment_to_HomeFragment"
+        app:destination="@id/HomeFragment" />
 
     </fragment>
     <fragment
@@ -97,5 +146,41 @@
         <action
             android:id="@+id/action_UsersFragment_to_ListFragment"
             app:destination="@id/ListFragment" />
+        <action
+            android:id="@+id/action_UsersFragment_to_MapFragment"
+            app:destination="@id/MapFragment" />
+        <action
+            android:id="@+id/action_UsersFragment_to_ProfileFragment"
+            app:destination="@id/ProfileFragment" />
+        <action
+            android:id="@+id/action_UsersFragment_to_LoginFragment"
+            app:destination="@id/LoginFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/RegisterFragment"
+        android:name="com.example.tourapp.fragment.RegisterFragment"
+        android:label="@string/login_activity_register_button"
+        tools:layout="@layout/activity_register">
+        <action
+            android:id="@+id/action_RegisterFragment_to_LoginFragment"
+            app:destination="@id/LoginFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/ProfileFragment"
+        android:name="com.example.tourapp.fragment.ProfileFragment"
+        android:label="@string/profile"
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_ProfileFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
+        <action
+            android:id="@+id/action_ProfileFragment_to_MapFragment"
+            app:destination="@id/MapFragment" />
+        <action
+            android:id="@+id/action_ProfileFragment_to_UsersFragment"
+            app:destination="@id/UsersFragment" />
+
     </fragment>
 </navigation>

@@ -114,7 +114,7 @@ class ListFragment : Fragment() {
                 this.findNavController().navigate(R.id.action_ListFragment_to_EditFragment)
                 true
             }
-            R.id.action_users -> {
+            R.id.menu_leaderboard -> {
                 this.findNavController().navigate(R.id.action_ListFragment_to_UsersFragment)
                 true
             }

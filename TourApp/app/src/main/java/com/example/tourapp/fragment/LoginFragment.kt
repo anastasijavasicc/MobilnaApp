@@ -47,7 +47,7 @@ class LoginFragment : Fragment() {
         val sharedPreferences = requireActivity().getSharedPreferences("TourApp", Context.MODE_PRIVATE)
         val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
         if (isLoggedIn) {
-            Navigation.findNavController(binding.root).navigate(R.id.action_LoginFragment_to_HomeFragment)
+           Navigation.findNavController(binding.root).navigate(R.id.action_LoginFragment_to_HomeFragment)
         }
         binding.loginbtnRegister.setOnClickListener{
             Navigation.findNavController(binding.root).navigate(R.id.action_LoginFragment_to_RegisterFragment)
@@ -57,7 +57,7 @@ class LoginFragment : Fragment() {
         }
 
     }
-    private fun saveLoginState(username: String, password: String) {
+      private fun saveLoginState(username: String, password: String) {
         val sharedPreferences = requireContext().getSharedPreferences("TourApp", Context.MODE_PRIVATE)
         sharedPreferences.edit().putBoolean("isLoggedIn", true).apply()
         sharedPreferences.edit().putString("username",username ).apply()
@@ -80,7 +80,7 @@ class LoginFragment : Fragment() {
                         val sifra2: String = dataSnapshot.child("password").getValue(String::class.java)!!
                         if(sifra2==sifra)
                         {
-                            saveLoginState(username,sifra)
+                           // saveLoginState(username,sifra)
                            // loggedUserViewModel.login(username)
                             Navigation.findNavController(binding.root).navigate(R.id.action_LoginFragment_to_HomeFragment)
                         }else{

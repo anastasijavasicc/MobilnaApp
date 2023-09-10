@@ -47,24 +47,18 @@ class MainActivity : AppCompatActivity(), ILocationClient {
 
 
         binding.fab?.show()
-        navController.addOnDestinationChangedListener{controller, destination, arguments ->
-            if(destination.id == R.id.EditFragment || destination.id == R.id.ViewFragment || destination.id == R.id.UsersFragment)
-                binding.fab?.hide()
-            else
-                binding.fab?.show()
-        }
 
 
         binding.fab?.setOnClickListener { view ->
             if (navController.currentDestination?.id == R.id.HomeFragment)
-               navController.navigate(R.id.action_HomeFragment_to_EditFragment)
+                navController.navigate(R.id.action_HomeFragment_to_EditFragment)
             else if (navController.currentDestination?.id == R.id.ListFragment)
                 navController.navigate(R.id.action_ListFragment_to_EditFragment)
             else if (navController.currentDestination?.id == R.id.MapFragment)
                 navController.navigate(R.id.action_MapFragment_to_EditFragment)
 
-           // Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-              //  .setAction("Action", null).show()
+            // Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+            //  .setAction("Action", null).show()
 
         }
 
@@ -74,10 +68,10 @@ class MainActivity : AppCompatActivity(), ILocationClient {
 
 
     //override fun onCreateOptionsMenu(menu: Menu): Boolean {
-       // // Inflate the menu; this adds items to the action bar if it is present.
-       // menuInflater.inflate(R.menu.menu_my_places_list, menu)
-      //  return true
-  //  }
+    // // Inflate the menu; this adds items to the action bar if it is present.
+    // menuInflater.inflate(R.menu.menu_my_places_list, menu)
+    //  return true
+    //  }
 
     override fun onBackPressed() {
         if (navController.currentDestination?.id == R.id.HomeFragment) {
@@ -93,7 +87,8 @@ class MainActivity : AppCompatActivity(), ILocationClient {
         // as you specify a parent activity in AndroidManifest.xml.
 
 
-       when (item.itemId) {
+
+        when (item.itemId) {
             R.id.action_show_map -> {
 
                 when (navController.currentDestination?.id) {
@@ -113,14 +108,6 @@ class MainActivity : AppCompatActivity(), ILocationClient {
                 //Toast.makeText(this,"Show map!", Toast.LENGTH_SHORT).show()
 
             }
-           R.id.loginBtnLog -> {
-               if (navController.currentDestination?.id == R.id.LoginFragment)
-                   navController.navigate(R.id.action_LoginFragment_to_HomeFragment)
-           }
-           R.id.loginbtnRegister -> {
-               if (navController.currentDestination?.id == R.id.LoginFragment)
-                   navController.navigate(R.id.action_LoginFragment_to_RegisterFragment)
-           }
             R.id.menu_logout -> {
                 when (navController.currentDestination?.id) {
                     R.id.HomeFragment -> {
@@ -170,13 +157,13 @@ class MainActivity : AppCompatActivity(), ILocationClient {
 
                 }
             }
-          R.id.action_new_place -> Toast.makeText(this, "New Place!", Toast.LENGTH_SHORT).show()
-          //  R.id.action_my_places_list -> {
+            R.id.action_new_place -> Toast.makeText(this, "New Place!", Toast.LENGTH_SHORT).show()
+            //  R.id.action_my_places_list -> {
             //  this.findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.action_HomeFragment_to_ListFragment)
             //}
-           /** R.id.action_about -> {
-                val i: Intent = Intent(this, About::class.java)
-                startActivity(i)
+            /** R.id.action_about -> {
+            val i: Intent = Intent(this, About::class.java)
+            startActivity(i)
             }*/
 
         }

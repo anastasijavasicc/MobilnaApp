@@ -11,10 +11,7 @@ import com.example.tourapp.R
 import com.example.tourapp.data.User
 import com.example.tourapp.databinding.FragmentUsersBinding
 import com.example.tourapp.model.UserListAdapter
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.database.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,7 +27,9 @@ class UsersFragment : Fragment() {
     private val binding get() = _binding!!
     private var ascending = 0
     var list: ArrayList<User> = ArrayList()
-    var db = Firebase.firestore
+
+    private lateinit var database: FirebaseDatabase
+    private lateinit var usersReference: DatabaseReference
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -44,8 +43,9 @@ class UsersFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        createList()
-
+        //createList()
+        database = FirebaseDatabase.getInstance()
+        usersReference = database.reference.child("Users")
         var switch: Switch = binding.switch1
         switch.setOnCheckedChangeListener { compoundButton, b ->
             if (b)
@@ -55,55 +55,45 @@ class UsersFragment : Fragment() {
 
             createList()
         }
+        createList()
 
     }
 
     fun createList() {
         list.clear()
-        CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             try {
-                val result: QuerySnapshot
-                if (ascending == 1)
-                    result = withContext(Dispatchers.IO) {
-                        db.collection("users")
-                            .orderBy("addCount", Query.Direction.ASCENDING)
-                            .get()
-                            .await()
-                    }
-                else {
-                    result = withContext(Dispatchers.IO) {
-                        db.collection("users")
-                            .orderBy("addCount", Query.Direction.DESCENDING)
-                            .get()
-                            .await()
-                    }
-                }
+                val dataSnapshot = usersReference.orderByChild("addCount").get().await()
 
-                for (document in result) {
-                    var data = document.data
+                for (snapshot in dataSnapshot.children) {
+                    val data = snapshot.value as Map<*, *>?
 
-                    list.add(
-                        User(
-                            data["username"].toString()!!,
-                            data.get("password").toString()!!,
-                            data["first name"].toString()!!,
-                            data.get("last name").toString()!!,
-                            data.get("phone").toString()!!,
-                            data.get("url").toString()!!,
-                            data.get("addCount").toString().toDouble()!!,
-                            data.get("starsCount").toString().toDouble()!!,
-                            data.get("commentsCount").toString().toDouble()!!,
-                            document.id
-
+                    if (data != null) {
+                        val user = User(
+                            data["username"].toString() ?: "",
+                            data["password"].toString() ?: "",
+                            data["firstName"].toString() ?: "",
+                            data["lastName"].toString() ?: "",
+                            data["phoneNumber"].toString() ?: "",
+                            data["profilePhotoUrl"].toString() ?: "",
+                            (data["addCount"] as? Double) ?: 0.0,
+                            (data["starsCount"] as? Double) ?: 0.0,
+                            (data["commentsCount"] as? Double) ?: 0.0,
+                            snapshot.key.toString()
                         )
-                    )
 
+                        list.add(user)
+                    }
                 }
-                showList(requireView(), list)
-            } catch (e: java.lang.Exception) {
-                Log.w("TAGA", "GReska", e)
+
+                withContext(Dispatchers.Main) {
+                    showList(requireView(), list)
+                }
+            } catch (e: Exception) {
+                Log.e("TAGA", "Greška", e)
             }
         }
+
     }
 
     fun showList(view: View, arrayList: java.util.ArrayList<User>) {

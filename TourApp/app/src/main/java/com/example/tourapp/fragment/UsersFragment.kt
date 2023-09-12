@@ -43,7 +43,6 @@ class UsersFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //createList()
         database = FirebaseDatabase.getInstance()
         usersReference = database.reference.child("Users")
         var switch: Switch = binding.switch1

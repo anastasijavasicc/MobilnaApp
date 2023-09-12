@@ -6,11 +6,13 @@
     android:layout_height="match_parent"
     tools:context=".fragment.ProfileFragment">
 
+
     <ImageView
         android:id="@+id/profile_image"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_marginTop="16dp"
+        android:background="@drawable/baseline_account_circle_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -46,10 +48,10 @@
         app:layout_constraintGuide_begin="205dp" />
 
     <TextView
-        android:id="@+id/email_label"
+        android:id="@+id/lastname_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/your_email"
+        android:text="Surname"
         android:textSize="24sp"
         app:layout_constraintTop_toBottomOf="@id/name_label"
         app:layout_constraintEnd_toEndOf="@id/guideline3"
@@ -57,10 +59,10 @@
         android:layout_marginTop="42dp"/>
 
     <TextView
-        android:id="@+id/email_display"
+        android:id="@+id/lastname_display"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/youremail"
+        android:text="surname"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="@id/guideline3"
         app:layout_constraintEnd_toEndOf="parent"
@@ -74,7 +76,7 @@
         android:textSize="24sp"
         android:text="Your Phone:"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/email_label"
+        app:layout_constraintTop_toBottomOf="@id/lastname_label"
         app:layout_constraintEnd_toEndOf="@id/guideline3"
         android:layout_marginTop="42dp"/>
 
@@ -86,7 +88,7 @@
         android:text="@string/yourphone"
         app:layout_constraintStart_toStartOf="@id/guideline3"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/email_display"
+        app:layout_constraintTop_toBottomOf="@id/lastname_display"
         android:layout_marginTop="42dp"/>
 
     <TextView
@@ -111,27 +113,17 @@
         app:layout_constraintTop_toBottomOf="@id/phone_display"
         android:layout_marginTop="42dp"/>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/add_number_btn"
-        android:layout_width="150dp"
-        android:layout_height="60dp"
-        android:layout_marginBottom="42dp"
-        android:text="@string/add_number"
-        app:cornerRadius="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/add_photo_btn"
         android:layout_width="150dp"
         android:layout_height="60dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginTop="40dp"
         android:text="Add Photo"
         app:cornerRadius="10dp"
-        app:layout_constraintBottom_toTopOf="@id/add_number_btn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/point_label" />
 
     <ImageView
         android:id="@+id/infoButton"

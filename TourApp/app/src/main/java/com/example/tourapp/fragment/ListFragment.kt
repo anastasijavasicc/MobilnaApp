@@ -49,7 +49,6 @@ class ListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         _binding = FragmentListBinding.inflate(inflater, container, false)
         return binding.root
 

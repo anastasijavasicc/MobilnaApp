@@ -6,25 +6,38 @@
     android:layout_height="match_parent"
     tools:context=".fragment.UsersFragment">
 
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clickable="true"
+        android:elevation="3dp"
+        android:focusable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/background"
+        app:menu="@menu/menu_main"
+        app:title="TourApp"
+        app:titleTextAppearance="@style/TextAppearance.AppCompat.Large" />
 
     <Switch
         android:id="@+id/switch1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="60px"
+        android:layout_margin="10dp"
+        android:layout_marginTop="10dp"
         android:text="Rastuci"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:layout_constraintVertical_weight="1" />
-
 
     <ListView
         android:id="@+id/listUsers"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -18,6 +18,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.example.tourapp.R
 import com.example.tourapp.databinding.ActivityLoginBinding
 import com.example.tourapp.viewmodels.LoggedUserViewModel
+import com.google.firebase.database.ktx.getValue
 import java.security.MessageDigest
 
 
@@ -78,9 +79,15 @@ class LoginFragment : Fragment() {
                         val dataSnapshot = task.result
                         val username: String = dataSnapshot.child("username").getValue(String::class.java)!!
                         val sifra2: String = dataSnapshot.child("password").getValue(String::class.java)!!
+                        val idd: String = dataSnapshot.child("id").getValue(String::class.java)!!
+                        val sharedPreferences = context?.getSharedPreferences("TourApp", Context.MODE_PRIVATE)
+                        val editor = sharedPreferences?.edit()
+                        editor!!.putString("userId", username)
+                        editor.apply()
+
                         if(sifra2==sifra)
                         {
-                           // saveLoginState(username,sifra)
+                            saveLoginState(username,sifra)
                            // loggedUserViewModel.login(username)
                             Navigation.findNavController(binding.root).navigate(R.id.action_LoginFragment_to_HomeFragment)
                         }else{
@@ -108,6 +115,7 @@ class LoginFragment : Fragment() {
             Toast.makeText(activityObj, "Unesite sve podatke", Toast.LENGTH_LONG).show()
         }
     }
+
     private fun hashPassword(password: String): String {
         val md = MessageDigest.getInstance("SHA-256")
         val hashedBytes = md.digest(password.toByteArray(Charsets.UTF_8))

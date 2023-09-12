@@ -109,20 +109,7 @@ class MainActivity : AppCompatActivity(), ILocationClient {
 
             }
             R.id.menu_logout -> {
-                when (navController.currentDestination?.id) {
-                    R.id.HomeFragment -> {
-                        navController.navigate(R.id.action_HomeFragment_to_LoginFragment)
-                    }
-                    R.id.MapFragment -> {
-                        navController.navigate(R.id.action_MapFragment_to_LoginFragment)
-                    }
-                    R.id.ListFragment -> {
-                        navController.navigate(R.id.action_ListFragment_to_LoginFragment)
-                    }
-                    R.id.UsersFragment -> {
-                        navController.navigate(R.id.action_UsersFragment_to_LoginFragment)
-                    }
-                }
+                logout()
             }
             R.id.menu_profile -> {
                 when (navController.currentDestination?.id) {
@@ -171,7 +158,13 @@ class MainActivity : AppCompatActivity(), ILocationClient {
 
 
     }
-
+    private fun logout(){
+        val sharedPreferences = this.getSharedPreferences("TourApp", Context.MODE_PRIVATE)
+        sharedPreferences.edit().putBoolean("isLoggedIn", false).apply()
+        sharedPreferences.edit().remove("username").apply()
+        sharedPreferences.edit().remove("password").apply()
+        navController.navigate(R.id.action_HomeFragment_to_LoginFragment)
+    }
     override fun onDestroy() {
         locationClient?.stop()
         super.onDestroy()

@@ -68,15 +68,19 @@ class HomeFragment : Fragment() /*, BottomNavigationView.OnNavigationItemSelecte
             }
         }
 
-        // Postavite osluškivač za navigaciju na dnu ekrana
+        // Postavi osluškivač za navigaciju na dnu ekrana
         navigationView.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.action_new_place -> {
                     findNavController().navigate(R.id.action_HomeFragment_to_EditFragment)
                     true
                 }
-                R.id.map -> {
+                R.id.menu_map -> {
                     findNavController().navigate(R.id.action_HomeFragment_to_MapFragment)
+                    true
+                }
+                R.id.menu_home -> {
+                    findNavController().navigate(R.id.action_HomeFragment_to_HomeFragment)
                     true
                 }
                 R.id.menu_profile -> {

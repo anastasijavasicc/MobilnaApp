@@ -89,8 +89,7 @@ class MainActivity : AppCompatActivity(), ILocationClient {
 
 
         when (item.itemId) {
-            R.id.action_show_map -> {
-
+            R.id.menu_map -> {
                 when (navController.currentDestination?.id) {
                     R.id.HomeFragment -> {
                         navController.navigate(R.id.action_HomeFragment_to_MapFragment)
@@ -110,6 +109,22 @@ class MainActivity : AppCompatActivity(), ILocationClient {
             }
             R.id.menu_logout -> {
                 logout()
+            }
+            R.id.menu_home -> {
+                when (navController.currentDestination?.id) {
+                    R.id.HomeFragment -> {
+                        navController.navigate(R.id.action_HomeFragment_to_HomeFragment)
+                    }
+                    R.id.ListFragment -> {
+                        navController.navigate(R.id.action_ListFragment_to_HomeFragment)
+                    }
+                    R.id.ProfileFragment -> {
+                        navController.navigate(R.id.action_ProfileFragment_to_HomeFragment)
+                    }
+                    R.id.UsersFragment -> {
+                        navController.navigate(R.id.action_UsersFragment_to_HomeFragment)
+                    }
+                }
             }
             R.id.menu_profile -> {
                 when (navController.currentDestination?.id) {

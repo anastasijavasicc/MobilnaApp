@@ -31,6 +31,8 @@ import com.firebase.geofire.GeoFireUtils
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
@@ -49,6 +51,7 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.util.*
+import kotlin.collections.HashMap
 
 
 class MapFragment : Fragment(), ILocationClient {
@@ -58,7 +61,7 @@ class MapFragment : Fragment(), ILocationClient {
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
     private val myPlacesViewModel: MyPlacesViewModel by activityViewModels()
-    private var db = Firebase.firestore
+    private var db = FirebaseDatabase.getInstance().reference.child("places")
     private var searchType = "name"
 
     private lateinit var myMarker: Marker
@@ -73,11 +76,13 @@ class MapFragment : Fragment(), ILocationClient {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_map, container, false)
+        _binding = FragmentMapBinding.inflate(inflater, container, false)
+        //inflater.inflate(R.layout.fragment_map, container, false)
+        return binding.root
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_main, menu)
+        inflater.inflate(R.menu.bottom_nav, menu)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -218,11 +223,12 @@ class MapFragment : Fragment(), ILocationClient {
       */
 
     }
-    fun createList(result: QuerySnapshot): kotlin.collections.ArrayList<MyPlaces> {
+    fun createList(snapshot: DataSnapshot): kotlin.collections.ArrayList<MyPlaces> {
 
         var list: kotlin.collections.ArrayList<MyPlaces> = ArrayList()
-        for (document in result) {
-            var data = document.data
+
+        for (dataSnapshot in snapshot.children) {
+            val data = dataSnapshot.value as Map<String, Any>
             var grades = HashMap<String, Double>()
             if (data["grades"] != null) {
                 for (g in data["grades"] as HashMap<String, Double>)
@@ -245,7 +251,7 @@ class MapFragment : Fragment(), ILocationClient {
                     comments,
                     data["url"].toString(),
                     data["category"].toString(),
-                    document.id
+                    dataSnapshot.key.toString()
 
                 )
             )
@@ -259,14 +265,11 @@ class MapFragment : Fragment(), ILocationClient {
 
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                val result = withContext(Dispatchers.IO) {
-                    db.collection("places")
-
-                        .get()
-                        .await()
+                val snapshot = withContext(Dispatchers.IO) {
+                    db.get().await()
                 }
 
-                myPlacesViewModel.myPlacesList.addAll(createList(result))
+                myPlacesViewModel.myPlacesList.addAll(createList(snapshot))
 
                 setupMap(myPlacesViewModel.myPlacesList)
             } catch (e: java.lang.Exception) {
@@ -290,7 +293,7 @@ class MapFragment : Fragment(), ILocationClient {
 
             CoroutineScope(Dispatchers.Main).launch {
                 try {
-                    var result: QuerySnapshot
+                    var snapshot: DataSnapshot
                     if (field == "radius") {
                         val location = MainActivity.currentLocation
                         var center: GeoLocation = if (location == null)
@@ -301,32 +304,35 @@ class MapFragment : Fragment(), ILocationClient {
                         val radius = value.toDouble()
 
                         val bounds = GeoFireUtils.getGeoHashQueryBounds(center, radius)
-                        val tasks: MutableList<Task<QuerySnapshot>> = ArrayList()
+                        val tasks: MutableList<Task<DataSnapshot>> = ArrayList()
                         for (b in bounds) {
-                            val q = db.collection("places")
-                                .orderBy("geohash")
-                                .startAt(b.startHash)
+                            val q = db.orderByChild("geohash").startAt(b.startHash)
                                 .endAt(b.endHash)
-                            tasks.add(q.get())
+                            val task = q.get()
+                            tasks.add(task)
                         }
                         Tasks.whenAllComplete(tasks)
-                            .addOnCompleteListener {
-                                val matchingDocuments: MutableList<DocumentSnapshot> = ArrayList()
+                            .addOnCompleteListener { taskList ->
+                                val matchingDocuments: MutableList<DataSnapshot> = ArrayList()
                                 for (task in tasks) {
-                                    val snap = task.result
-                                    for (doc in snap!!.documents) {
-                                        val lat = doc.getString("latitude")!!
-                                        val lng = doc.getString("longitude")!!
-                                        val docLocation =
-                                            GeoLocation(lat.toDouble(), lng.toDouble())
-                                        val distance =
-                                            GeoFireUtils.getDistanceBetween(docLocation, center)
-                                        if (distance <= radius)
-                                            matchingDocuments.add(doc)
+                                    if (task.isSuccessful) {
+                                        val snapshot = task.result
+                                        for (childSnapshot in snapshot!!.children) {
+                                            val lat = childSnapshot.child("latitude").getValue(String::class.java) ?: ""
+                                            val lng = childSnapshot.child("longitude").getValue(String::class.java) ?: ""
+                                            val docLocation = GeoLocation(lat.toDouble(), lng.toDouble())
+                                            val distance = GeoFireUtils.getDistanceBetween(docLocation, center)
+                                            if (distance <= radius)
+                                                matchingDocuments.add(childSnapshot)
+                                        }
+                                    } else {
+                                        // Handle the error here
+                                        val exception = task.exception
+                                        Log.e("FirebaseError", "Error getting data: $exception")
                                     }
 
                                     for (document in matchingDocuments) {
-                                        var data = document.getData()
+                                        var data = document.value as Map<String, Any>
                                         var grades = HashMap<String, Double>()
                                         if (data?.get("grades") != null) {
                                             for (g in data["grades"] as HashMap<String, Double>)
@@ -341,21 +347,19 @@ class MapFragment : Fragment(), ILocationClient {
                                         }
 
                                         var url: String =
-                                            "places/" + document.getString("name") + data?.get("latitude")
-                                                .toString() + data?.get("longitude")
-                                                .toString() + ".jpg"
+                                            "places/${data["name"]}${data["latitude"]}${data["longitude"]}.jpg"
                                         myPlacesViewModel
                                             .addPlace(
                                                 MyPlaces(
-                                                    data?.get("name").toString(),
-                                                    data?.get("description").toString(),
-                                                    data?.get("latitude").toString(),
-                                                    data?.get("longitude").toString(),
-                                                    data?.get("autor").toString(),
+                                                    data["name"].toString(),
+                                                    data["description"].toString(),
+                                                    data["latitude"].toString(),
+                                                    data["longitude"].toString(),
+                                                    data["autor"].toString(),
                                                     grades,
                                                     comments,
                                                     url,
-                                                    data?.get("category").toString(),
+                                                    data["category"].toString(),
                                                     ""
                                                 )
                                             )
@@ -368,33 +372,20 @@ class MapFragment : Fragment(), ILocationClient {
 
                     } else
                         if (field.equals("grade")) {
-                            result = withContext(Dispatchers.IO) {
-                                db.collection("places")
-
-                                    .get()
-                                    .await()
-
+                            val snapshot = withContext(Dispatchers.IO) {
+                                db.get().await()
                             }
-                            for (document in result) {
-                                var data = document.data
-                                var grades = java.util.HashMap<String, Double>()
+                            for (dataSnapshot in snapshot.children) {
+                                val data = dataSnapshot.value as Map<String, Any>
+                                val gradesData = data["grades"] as Map<String, Double>?
+                                val commentsData = data["comments"] as Map<String, String>?
+
+                                val grades = gradesData?.toMutableMap() ?: mutableMapOf()
+                                val comments = commentsData?.toMutableMap() ?: mutableMapOf()
+
                                 var sum: Double = 0.0
-                                if (data["grades"] != null) {
-                                    for (g in data["grades"] as java.util.HashMap<String, Double>) {
-                                        grades[g.key] = g.value
-                                        sum += g.value
-                                    }
-                                    sum /= grades.size
-
-                                }
-                                var comments = kotlin.collections.HashMap<String, String>()
-                                if (data["comments"] != null) {
-                                    for (c in data["comments"] as kotlin.collections.HashMap<String, String>)
-                                        comments[c.key] = c.value
-                                }
-
                                 var url: String =
-                                    "places/" + data["name"] + data["latitude"].toString() + data["longitude"].toString() + ".jpg"
+                                    "places/${data["name"]}${data["latitude"]}${data["longitude"]}.jpg"
                                 if (sum >= value.toDouble())
                                     myPlacesViewModel
                                         .addPlace(
@@ -404,11 +395,11 @@ class MapFragment : Fragment(), ILocationClient {
                                                 data["latitude"].toString(),
                                                 data["longitude"].toString(),
                                                 data["autor"].toString(),
-                                                grades,
-                                                comments,
+                                                grades as HashMap<String, Double>,
+                                                comments as HashMap<String, String>,
                                                 url,
                                                 data["category"].toString(),
-                                                document.id
+                                                dataSnapshot.key.toString()
 
                                             )
                                         )
@@ -419,26 +410,19 @@ class MapFragment : Fragment(), ILocationClient {
 
                         } else {
                             if (type == 0) {
-                                result = withContext(Dispatchers.IO) {
-                                    db.collection("places")
-                                        .whereEqualTo(field, value)
-
-                                        .get()
-                                        .await()
-
+                                val query = db.orderByChild(field).equalTo(value)
+                                snapshot = withContext(Dispatchers.IO) {
+                                    query.get().await()
                                 }
 
                             } else {
-                                result = withContext(Dispatchers.IO) {
-                                    db.collection("places")
-                                        .whereGreaterThanOrEqualTo(field, value)
-
-                                        .get()
-                                        .await()
+                                val query = db.orderByChild(field).startAt(value)
+                                snapshot = withContext(Dispatchers.IO) {
+                                    query.get().await()
                                 }
 
                             }
-                            myPlacesViewModel.myPlacesList.addAll(createList(result))
+                            myPlacesViewModel.myPlacesList.addAll(createList(snapshot))
 
                             setupMap(myPlacesViewModel.myPlacesList)
                         }
@@ -497,8 +481,9 @@ class MapFragment : Fragment(), ILocationClient {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        var item=menu.findItem(R.id.action_show_map)
-        item.isVisible = false;
+        var item=menu.findItem(R.id.menu_map)
+        if(item != null)
+            item.isVisible = false;
     }
 
     override fun onResume() {
@@ -532,6 +517,7 @@ class MapFragment : Fragment(), ILocationClient {
     override fun onDestroyView() {
         MainActivity.iLocationClient = null
         super.onDestroyView()
+        _binding=null
     }
 
     override fun onNewLocation(location: Location) {

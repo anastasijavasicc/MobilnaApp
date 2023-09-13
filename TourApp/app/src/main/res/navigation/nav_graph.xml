@@ -155,6 +155,9 @@
         <action
             android:id="@+id/action_UsersFragment_to_LoginFragment"
             app:destination="@id/LoginFragment" />
+        <action
+            android:id="@+id/action_UsersFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
     </fragment>
     <fragment
         android:id="@+id/RegisterFragment"

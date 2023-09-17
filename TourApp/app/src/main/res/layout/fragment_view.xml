@@ -139,12 +139,26 @@
         android:id="@+id/ViewFragmentClose"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="97dp"
         android:layout_marginBottom="60px"
         android:text="@string/viewmyplace_finished_label"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toEndOf="@id/btnOceni"
+        app:layout_constraintTop_toBottomOf="@+id/viewmyplace_lat_text" />
+
+    <Button
+        android:id="@+id/btnOceni"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="97dp"
+        android:layout_marginBottom="23dp"
+        android:text="Rate"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/ViewFragmentClose"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/viewmyplace_lat_text" />
 
     <RatingBar
         android:id="@+id/ratingBar2"
@@ -198,6 +212,8 @@
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvLatitude"/>
+        app:layout_constraintTop_toBottomOf="@+id/tvLatitude" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

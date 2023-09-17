@@ -1,38 +1,17 @@
 package com.example.tourapp.fragment
 
-import android.annotation.SuppressLint
-import android.app.ActionBar
-import android.app.Activity
-import android.app.Dialog
-import android.content.ContentValues.TAG
 import android.content.Context
-import android.content.Intent
-import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.widget.*
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.tourapp.R
-import com.google.android.gms.tasks.OnSuccessListener
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.textfield.TextInputEditText
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.storage.FirebaseStorage
-import com.example.tourapp.R.layout.profile_info_dialog
 import com.example.tourapp.data.User
-import com.example.tourapp.data.UserObject
-import com.example.tourapp.data.UserObject.profilePhotoUrl
-import com.example.tourapp.databinding.FragmentHomeBinding
 import com.example.tourapp.databinding.FragmentProfileBinding
-import com.example.tourapp.databinding.FragmentUsersBinding
-import com.example.tourapp.model.UserListAdapter
 import com.google.firebase.database.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,10 +26,9 @@ class ProfileFragment : Fragment() {
   //  private lateinit var databaseReference: DatabaseReference
     private lateinit var userReference: DatabaseReference
     private lateinit var binding: FragmentProfileBinding
-    private var auth = FirebaseAuth.getInstance()
-    //val currentUser = FirebaseAuth.getInstance().currentUser
+
     var list: ArrayList<User> = ArrayList()
-    var storage: FirebaseStorage? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -67,7 +45,7 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
             var userId = getUserIdFromLocalStorage()
-            //val userId = auth.currentUser!!
+
         if(userId == null)
             userId = "105" //ovo je da proverim ja za sebe
         database = FirebaseDatabase.getInstance()
@@ -91,13 +69,12 @@ class ProfileFragment : Fragment() {
                             data["lastName"].toString() ?: "",
                             data["phoneNumber"].toString() ?: "",
                             data["profilePhotoUrl"].toString() ?: "",
-                            (data["addCount"] as? Double) ?: 0.0,
-                            (data["starsCount"] as? Double) ?: 0.0,
-                            (data["commentsCount"] as? Double) ?: 0.0,
+                            (data["addCount"] as? Long ?: 0.0).toDouble(),
+                            (data["starsCount"] as? Long ?: 0.0).toDouble(),
+                            (data["commentsCount"] as? Long ?: 0.0).toDouble(),
                             snapshot.key.toString()
                         )
                         val dd = snapshot.key
-                        Log.e("TAGA", "user je ${user.firstName} sa ${dd}")
                         if(dd == getUserIdFromLocalStorage()) {
                             list.add(user)
                         }
@@ -122,7 +99,7 @@ class ProfileFragment : Fragment() {
             val pointss:TextView = requireView().findViewById(R.id.point_display)
             val profileImageImageView: ImageView = requireView().findViewById(R.id.profile_image)
             val phone: TextView = requireView().findViewById(R.id.phone_display)
-
+            val poeniUkupno = user.addCount+user.commentsCount
             nameDisplayTextView.text = user.firstName
             surnameDisplayTextView.text = user.lastName
             pointss.text = user.addCount.toString()

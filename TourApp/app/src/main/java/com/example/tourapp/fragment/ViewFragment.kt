@@ -64,6 +64,9 @@ class ViewFragment : Fragment() {
             myPlacesViewModel.selected = null
             findNavController().navigate(R.id.action_ViewFragment_to_ListFragment)
         }
+        binding.btnOceni.setOnClickListener{
+            findNavController().navigate(R.id.action_ViewFragment_to_RankFragment)
+        }
     }
 
     override fun onDestroyView() {

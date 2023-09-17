@@ -47,7 +47,7 @@
     <string name="login_activity_register_button">Register</string>
     <string name="login_activity_username_label">Username:</string>
     <string name="login_activity_password_label">Password:</string>
-    <string name="welcome_message">Hello, Welcome</string>
+    <string name="welcome_message">Hello, please sign in</string>
     <string name="editmyplace_autor_label">Autor</string>
     <string name="edit_fragment_camera_btn">Camera</string>
     <string name="edit_fragment_galery_btn">Galery</string>

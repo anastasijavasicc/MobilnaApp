@@ -33,10 +33,6 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -146,13 +142,14 @@ class MapFragment : Fragment(), ILocationClient {
             )
         }else {
             //setMyLocationOverlay()
-            //setOnMapClickOverlay()
             setupMap(myPlacesViewModel.myPlacesList)
+            setOnMapClickOverlay() //ovo je podrska za klik na mapu
+
 
         }
         //da ukazuje na Nis:
-      //  map.controller.setZoom(15.0)
-       // val startPoint = GeoPoint(43.3209, 21.8958)
+     //   map.controller.setZoom(15.0)
+      //  val startPoint = GeoPoint(43.3209, 21.8958)
        // map.controller.setCenter(startPoint)
     }
     private fun setupMap(list: ArrayList<MyPlaces>){
@@ -165,7 +162,13 @@ class MapFragment : Fragment(), ILocationClient {
             ResourcesCompat.getDrawable(resources, org.osmdroid.library.R.drawable.person, null)
 
         myMarker.apply {
-            this.position = GeoPoint(0.0, 0.0)
+            val location = MainActivity.currentLocation
+            //this.position = GeoPoint(43.33161, 21.89257)
+            if (location != null) {
+                this.position = GeoPoint(location.latitude.toDouble(), location.longitude.toDouble())
+            }
+            else
+                this.position = GeoPoint(43.33161, 21.89257)
             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
             setOnMarkerClickListener { _, _ ->
                 false
@@ -377,13 +380,28 @@ class MapFragment : Fragment(), ILocationClient {
                             }
                             for (dataSnapshot in snapshot.children) {
                                 val data = dataSnapshot.value as Map<String, Any>
-                                val gradesData = data["grades"] as Map<String, Double>?
+                                var grades = java.util.HashMap<String, Double>()
+                                var sum: Double = 0.0
+                                if (data["grades"] != null) {
+                                    for (g in data["grades"] as java.util.HashMap<String, Double>) {
+                                        grades[g.key] = g.value
+                                        sum += g.value
+                                    }
+                                    sum /= grades.size
+
+                                }
+                                var comments = kotlin.collections.HashMap<String, String>()
+                                if (data["comments"] != null) {
+                                    for (c in data["comments"] as kotlin.collections.HashMap<String, String>)
+                                        comments[c.key] = c.value
+                                }
+                              /*  val gradesData = data["grades"] as Map<String, Double>?
                                 val commentsData = data["comments"] as Map<String, String>?
 
                                 val grades = gradesData?.toMutableMap() ?: mutableMapOf()
                                 val comments = commentsData?.toMutableMap() ?: mutableMapOf()
 
-                                var sum: Double = 0.0
+                                var sum: Double = 0.0*/
                                 var url: String =
                                     "places/${data["name"]}${data["latitude"]}${data["longitude"]}.jpg"
                                 if (sum >= value.toDouble())
@@ -395,8 +413,8 @@ class MapFragment : Fragment(), ILocationClient {
                                                 data["latitude"].toString(),
                                                 data["longitude"].toString(),
                                                 data["autor"].toString(),
-                                                grades as HashMap<String, Double>,
-                                                comments as HashMap<String, String>,
+                                                grades,
+                                                comments,
                                                 url,
                                                 data["category"].toString(),
                                                 dataSnapshot.key.toString()
@@ -446,6 +464,8 @@ class MapFragment : Fragment(), ILocationClient {
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
                 resetMap()
+                setOnMapClickOverlay()
+                //setMyLocationOverlay()
             }
         }
 

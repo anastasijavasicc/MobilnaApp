@@ -48,8 +48,10 @@ class HomeFragment : Fragment() /*, BottomNavigationView.OnNavigationItemSelecte
         val toolbar: MaterialToolbar = binding.toolbar
         val navigationView: BottomNavigationView = binding.bottomNav
 
-        // Postavite opcije menija i osluškivače ovde
 
+        binding.btnPrikaziList.setOnClickListener{
+            Navigation.findNavController(binding.root).navigate(R.id.action_HomeFragment_to_ListFragment)
+        }
         toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_logout -> {

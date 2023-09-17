@@ -1,5 +1,6 @@
 package com.example.tourapp.fragment
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,6 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.RatingBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -16,6 +18,8 @@ import com.example.tourapp.R
 import com.example.tourapp.data.UserObject
 import com.example.tourapp.databinding.FragmentRankBinding
 import com.example.tourapp.model.MyPlacesViewModel
+import com.google.android.play.core.integrity.e
+import com.google.firebase.database.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
@@ -30,8 +34,9 @@ class RankFragment : Fragment() {
     private val myPlacesViewModel: MyPlacesViewModel by activityViewModels()
     private var _binding: FragmentRankBinding? = null
     private val binding get() = _binding!!
-    private val db = Firebase.firestore
-    var userName: String = UserObject.username!!
+    private lateinit var dbReference: DatabaseReference
+
+
 
 
     override fun onCreateView(
@@ -40,12 +45,15 @@ class RankFragment : Fragment() {
     ): View? {
 
         _binding = FragmentRankBinding.inflate(inflater, container, false)
-
+        dbReference = FirebaseDatabase.getInstance().reference
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        var userName = getUserIdFromLocalStorage()!!
+
+
 
         var tvName: TextView = view.findViewById(R.id.RankFragmentName)
         tvName.setText(myPlacesViewModel.selected?.name)
@@ -60,87 +68,93 @@ class RankFragment : Fragment() {
             try {
                 val result = withContext(Dispatchers.IO) {
                     myPlacesViewModel.selected?.id?.let {
-                        db.collection("places")
-                            .document(it)
-                            .get()
-                            .await()
+                        dbReference.child("places").child(it).addListenerForSingleValueEvent(object :
+                            ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                if (snapshot.exists()) {
+                                    val data = snapshot.value as Map<String, Any>?
+                                    val hmGrades = data?.get("grades") as? HashMap<String, Double>?
+                                    val hmComments = data?.get("comments") as? HashMap<String, String>?
 
+                                    if (hmGrades?.get(userName) != null) {
+                                        rate.rating = hmGrades[userName]?.toFloat() ?: 0f
+                                    }
 
+                                    if (hmComments?.get(userName) != null) {
+                                        kom.setText(hmComments[userName] ?: "")
+                                    }
+
+                                }
+
+                            }
+                            override fun onCancelled(error: DatabaseError) {
+                                Log.w("TAGA", "Greška: $error")
+                            }
+                        })
+                    }
+                }
+                val oldRate = rate.rating
+                val oldKomm = kom.text.toString()
+
+                confirmbtn.setOnClickListener {
+                    val newRate = rate.rating.toDouble()
+                    val newComment = kom.text.toString()
+                    if (rate.rating != 0f)
+                        myPlacesViewModel.selected?.addGrade(userName, rate.rating.toDouble())
+                    myPlacesViewModel.selected?.addComment(userName, kom.text.toString())
+                    val placeId = myPlacesViewModel.selected?.id
+                    if (placeId != null) {
+                        val placeReference = dbReference.child("places").child(placeId)
+                        placeReference.child("grades").setValue(myPlacesViewModel.selected?.grades!!)
+                        placeReference.child("comments").setValue(myPlacesViewModel.selected?.comments!!)
+                        Toast.makeText(context,"OKEJ",Toast.LENGTH_LONG).show()
                     }
 
-                }
+                    val userReference = dbReference.child("users").child(userName)
+                      //  .equalTo("username",userName)
+                    var starsCount: Long = 0
+                    if (rate.rating != 0f && oldRate == 0f)
+                        starsCount = 1
+                    var kommCount: Long = 0
+                    if (kom.text.isNotEmpty() && oldKomm.isEmpty())
+                        kommCount = 1
+                    userReference.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (snapshot.exists()) {
+                                val userData = snapshot.value as Map<String, Any>?
+                                starsCount += userData?.get("starsCount") as Long
+                                var commentsCount = userData["commentsCount"] as Long
 
-                if (result != null) {
-                    val document = result.data
-                    var hmGrades: HashMap<String, Double>? =
-                        document?.get("grades") as HashMap<String, Double>?
+                                if (newRate > 0 && rate.rating == 0f) {
+                                    starsCount += 1
+                                }
+                                if (newComment.isNotEmpty() && oldKomm.isEmpty()) {
+                                    commentsCount += 1
+                                }
+                                val noviPodaci = hashMapOf<String, Any>(
+                                    "starsCount" to starsCount,
+                                    "commentsCount" to kommCount
+                                )
+                                userReference.updateChildren(noviPodaci)
+                                    .addOnSuccessListener {
+                                        Toast.makeText(context, "Podaci su azurirani za korisnika", Toast.LENGTH_LONG).show()
+                                    }
+                                    .addOnFailureListener { exception ->
+                                        Log.w("TAGA", "Error", exception)
+                                    }
+                                //userReference.child("starsCount").setValue(starsCount)
+                                //userReference.child("commentsCount").setValue(commentsCount)
 
-                    if (hmGrades?.get(userName) != null)
-                        rate.rating = (hmGrades[userName] as Double).toFloat()
-
-                    var hmComments: HashMap<String, String>? =
-                        document?.get("comments") as HashMap<String, String>?
-                    if (hmComments?.get(userName) != null)
-                        kom.setText(hmComments[userName]!!)
-
-                    var oldRate = rate.rating
-                    val oldKomm = kom.text.toString()
-
-                    confirmbtn.setOnClickListener {
-                        if (rate.rating != 0f)
-                            myPlacesViewModel.selected?.addGrade(userName, rate.rating.toDouble())
-
-
-                        myPlacesViewModel.selected?.addComment(userName, kom.text.toString())
-                        if (document != null) {
-                            document["grades"] = myPlacesViewModel.selected?.grades!!
-                            document["comments"] = myPlacesViewModel.selected?.comments!!
-
-                            result.reference.set(document)
+                            }
                         }
 
-                        var starsCount: Long = 0
-                        if (rate.rating != 0f && oldRate == 0f)
-                            starsCount = 2
-                        var kommCount: Long = 0
-                        if (kom.text.isNotEmpty() && oldKomm.isEmpty())
-                            kommCount = 1
+                        override fun onCancelled(error: DatabaseError) {
+                            Log.w("TAGA", "Greška: $error")
+                        }
+                    })
+                    myPlacesViewModel.selected = null
+                    findNavController().navigate(R.id.action_RankFragment_to_ListFragment)
 
-
-                        db.collection("users")
-                            .whereEqualTo("username", userName)
-                            .get()
-                            .addOnSuccessListener { querySnapshot ->
-                                for (documentSnapshot in querySnapshot.documents) {
-                                    val documentRef =
-                                        db.collection("users").document(documentSnapshot.id)
-
-                                    starsCount += documentSnapshot.get("starsCount") as Long
-
-                                    kommCount += documentSnapshot.get("commentsCount") as Long
-
-                                    val noviPodaci = hashMapOf<String, Any>(
-
-                                        "starsCount" to starsCount,
-                                        "commentsCount" to kommCount
-                                    )
-                                    documentRef.update(noviPodaci)
-                                        .addOnSuccessListener {
-
-                                        }
-                                        .addOnFailureListener { exception ->
-                                            Log.w("TAGA", "Error", exception)
-                                        }
-                                }
-                            }
-
-
-                        myPlacesViewModel.selected = null
-
-
-
-                        findNavController().navigate(R.id.action_RankFragment_to_ListFragment)
-                    }
                 }
 
             } catch (e: java.lang.Exception) {
@@ -148,11 +162,16 @@ class RankFragment : Fragment() {
             }
             cancelbtn.setOnClickListener {
                 myPlacesViewModel.selected = null
-                findNavController().navigate(R.id.action_RankFragment_to_ListFragment)
+                findNavController().popBackStack()
+                //findNavController().navigate(R.id.action_RankFragment_to_ListFragment)
             }
         }
 
 
+    }
+    private fun getUserIdFromLocalStorage(): String? {
+        val sharedPreferences = context?.getSharedPreferences("TourApp", Context.MODE_PRIVATE)
+        return sharedPreferences?.getString("userId", null)
     }
 
     override fun onDestroyView() {

@@ -18,9 +18,7 @@ import com.example.tourapp.data.UserObject
 import com.example.tourapp.databinding.FragmentListBinding
 import com.example.tourapp.model.MyPlacesListAdapter
 import com.example.tourapp.model.MyPlacesViewModel
-import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.database.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,21 +26,14 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.*
 
-/**
- * A simple [Fragment] subclass as the second destination in the navigation.
- */
 class ListFragment : Fragment() {
 
     private var _binding: FragmentListBinding? = null
-    // private lateinit var places:ArrayList<String>
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
     private val myPlacesViewModel: MyPlacesViewModel by activityViewModels()
-    private val db = Firebase.firestore
+    private val database: DatabaseReference = FirebaseDatabase.getInstance().reference.child("places")
     private var searchType: String = "name"
-    private var userName: String = UserObject.username!!
+    private var userName: String = UserObject.username.toString()
     private lateinit var myUser: User
     var lastCheckedRadioButton: RadioButton? = null
     override fun onCreateView(
@@ -58,32 +49,6 @@ class ListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         getList()
-
-       /** //binding.viewmyplaceNameText.text = myPlacesViewModel.selected?.name
-        val myPlacesList: ListView = requireView().findViewById<ListView>(R.id.my_places_list)
-        myPlacesList.adapter = ArrayAdapter<MyPlaces>(view.context, android.R.layout.simple_list_item_1, myPlacesViewModel.myPlacesList)
-
-        myPlacesList.setOnItemClickListener(object: AdapterView.OnItemClickListener{
-            override fun onItemClick(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long){
-                var myPlaces: MyPlaces = p0?.adapter?.getItem(p2) as MyPlaces
-                //Toast.makeText(view.context, myPlaces.description.toString(), Toast.LENGTH_SHORT).show()
-                myPlacesViewModel.selected = myPlaces
-                findNavController().navigate(R.id.action_ListFragment_to_ViewFragment)
-
-                }
-        })
-        myPlacesList.setOnCreateContextMenuListener(object: View.OnCreateContextMenuListener{
-            override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
-                val info = menuInfo as AdapterContextMenuInfo
-                val myPlaces: MyPlaces = myPlacesViewModel.myPlacesList[info.position]
-                menu?.setHeaderTitle(myPlaces.name)
-                menu?.add(0,1,1,"View place")
-                menu?.add(0,2,2,"Edit place")
-                menu?.add(0,3,3,"Delete place")
-                menu?.add(0,4,4,"Show on map")
-            }
-        })
-       */
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
@@ -123,8 +88,7 @@ class ListFragment : Fragment() {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-      //  val item = menu.findItem(R.id.action_my_places_list)
-     //   item.isVisible = false;
+
     }
     override fun onDestroyView() {
         super.onDestroyView()
@@ -167,34 +131,36 @@ class ListFragment : Fragment() {
         })
     }
 
-    fun listCreating(result: QuerySnapshot): kotlin.collections.ArrayList<MyPlaces> {
+    fun listCreating(snapshot: DataSnapshot): kotlin.collections.ArrayList<MyPlaces> {
 
-        var list: kotlin.collections.ArrayList<MyPlaces> = ArrayList()
-        for (document in result) {
-            var data = document.data
+        var list : kotlin.collections.ArrayList<MyPlaces> = ArrayList()
+        for (placeSnapshot in snapshot.children) {
+            //var place = placeSnapshot.getValue(MyPlaces::class.java)
+           // place?.let { list.add(it) }
+            var data = placeSnapshot.value as Map<*, *>?
             var grades = HashMap<String, Double>()
-            if (data["grades"] != null) {
+            if (data?.get("grades") != null) {
                 for (g in data["grades"] as HashMap<String, Double>)
                     grades[g.key] = g.value
             }
             var comments = HashMap<String, String>()
-            if (data["comments"] != null) {
+            if (data?.get("comments") != null) {
                 for (c in data["comments"] as HashMap<String, String>)
                     comments[c.key] = c.value
             }
 
             list.add(
                 MyPlaces(
-                    data["name"].toString(),
-                    data["description"].toString(),
-                    data["longitude"].toString(),
-                    data["latitude"].toString(),
-                    data["autor"].toString(),
+                    data?.get("name")?.toString() ?: "",
+                    data?.get("description")?.toString() ?: "",
+                    data?.get("longitude")?.toString() ?: "",
+                    data?.get("latitude")?.toString() ?: "",
+                    data?.get("autor")?.toString()?: "",
                     grades,
                     comments,
-                    data["url"].toString(),
-                    data["category"].toString(),
-                    document.id
+                    data?.get("url")?.toString() ?: "",
+                    data?.get("category")?.toString() ?: "",
+                    placeSnapshot.key.toString()
                 )
             )
 
@@ -205,22 +171,16 @@ class ListFragment : Fragment() {
 
         myPlacesViewModel.myPlacesList.clear()
 
-        CoroutineScope(Dispatchers.Main).launch {
-            try {
-                val result = withContext(Dispatchers.IO) {
-                    db.collection("places")
-
-                        .get()
-                        .await()
-                }
-
-                myPlacesViewModel.myPlacesList.addAll(listCreating(result))
-
+        database.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                myPlacesViewModel.myPlacesList.addAll(listCreating(snapshot))
                 showList(requireView(), myPlacesViewModel.myPlacesList)
-            } catch (e: Exception) {
-                Log.w("TAGA", "Greska", e)
             }
-        }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.w("TAGA", "Greska", error.toException())
+            }
+        })
 
 
     }
@@ -262,20 +222,17 @@ class ListFragment : Fragment() {
 
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                var result: QuerySnapshot
+                var result: DataSnapshot
                 if (field.equals("grade")) {
                     result = withContext(Dispatchers.IO) {
-                        db.collection("places")
-
-                            .get()
-                            .await()
+                        database.get().await()
 
                     }
-                    for (document in result) {
-                        var data = document.data
+                    for (document in result.children) {
+                        var data = document.value as Map<*, *>?
                         var grades = HashMap<String, Double>()
                         var sum: Double = 0.0
-                        if (data["grades"] != null) {
+                        if (data?.get("grades") != null) {
                             for (g in data["grades"] as HashMap<String, Double>) {
                                 grades[g.key] = g.value
                                 sum += g.value
@@ -284,27 +241,27 @@ class ListFragment : Fragment() {
 
                         }
                         var comments = HashMap<String, String>()
-                        if (data["comments"] != null) {
+                        if (data?.get("comments") != null) {
                             for (c in data["comments"] as HashMap<String, String>)
                                 comments[c.key] = c.value
                         }
 
                         var url: String =
-                            "places/" + data["name"] + data["latitude"].toString() + data["longitude"].toString() + ".jpg"
+                            "places/${data?.get("name")}${data?.get("latitude")}${data?.get("longitude")}.jpg"
                         if (sum >= query.toDouble())
                             myPlacesViewModel
                                 .addPlace(
                                     MyPlaces(
-                                        data["name"].toString(),
-                                        data["description"].toString(),
-                                        data["longitude"].toString(),
-                                        data["latitude"].toString(),
-                                        data["autor"].toString(),
+                                        data?.get("name")?.toString() ?: "",
+                                        data?.get("description")?.toString() ?: "",
+                                        data?.get("longitude")?.toString() ?: "",
+                                        data?.get("latitude")?.toString() ?: "",
+                                        data?.get("autor")?.toString()?: "",
                                         grades,
                                         comments,
-                                        data["url"].toString(),
-                                        data["category"].toString(),
-                                        document.id
+                                        url,
+                                        data?.get("category")?.toString() ?: "",
+                                        document.key.toString()
 
                                     )
                                 )
@@ -317,8 +274,9 @@ class ListFragment : Fragment() {
                         if (category == 0) {
 
                             result = withContext(Dispatchers.IO) {
-                                db.collection("places")
-                                    .whereEqualTo(field, query)
+                                database.child(field)
+                                    .equalTo(query)
+                                    //.whereEqualTo(field, query)
 
                                     .get()
                                     .await()
@@ -328,8 +286,8 @@ class ListFragment : Fragment() {
                         } else {
 
                             result = withContext(Dispatchers.IO) {
-                                db.collection("places")
-                                    .whereGreaterThanOrEqualTo(field, query)
+                                database.child(field).startAt(query)
+                                   // .whereGreaterThanOrEqualTo(field, query)
 
                                     .get()
                                     .await()

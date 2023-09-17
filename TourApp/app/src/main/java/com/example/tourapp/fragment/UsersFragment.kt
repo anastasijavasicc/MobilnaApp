@@ -62,6 +62,7 @@ class UsersFragment : Fragment() {
         list.clear()
         CoroutineScope(Dispatchers.IO).launch {
             try {
+
                 val dataSnapshot = usersReference.orderByChild("addCount").get().await()
 
                 for (snapshot in dataSnapshot.children) {
@@ -75,13 +76,16 @@ class UsersFragment : Fragment() {
                             data["lastName"].toString() ?: "",
                             data["phoneNumber"].toString() ?: "",
                             data["profilePhotoUrl"].toString() ?: "",
-                            (data["addCount"] as? Double) ?: 0.0,
-                            (data["starsCount"] as? Double) ?: 0.0,
-                            (data["commentsCount"] as? Double) ?: 0.0,
+                            (data["addCount"] as? Long ?: 0.0).toDouble(),
+                            (data["starsCount"] as? Long ?: 0.0).toDouble(),
+                            (data["commentsCount"] as? Long ?: 0.0).toDouble(),
                             snapshot.key.toString()
                         )
 
                         list.add(user)
+                    }
+                    if (ascending != 1) {
+                        list.reverse()
                     }
                 }
 

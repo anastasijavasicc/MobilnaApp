@@ -6,8 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Insets.add
-import com.google.android.gms.tasks.OnFailureListener
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
@@ -29,16 +27,13 @@ import androidx.navigation.fragment.findNavController
 import com.example.tourapp.R
 import com.example.tourapp.activity.MainActivity
 import com.example.tourapp.data.MyPlaces
-import com.example.tourapp.data.User
-import com.example.tourapp.data.UserObject
 import com.example.tourapp.databinding.FragmentEditBinding
 import com.example.tourapp.model.LocationViewModel
 import com.example.tourapp.model.MyPlacesViewModel
 import com.example.tourapp.viewmodels.LoggedUserViewModel
 import com.firebase.geofire.GeoFireUtils
 import com.firebase.geofire.GeoLocation
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
@@ -64,6 +59,7 @@ class EditFragment : Fragment() {
     private val storage = Firebase.storage
     private var storageRef = storage.reference
     private lateinit var databasePlace: DatabaseReference
+   // var userName: String = UserObject.username!!
 
     private val loggedUserViewModel: LoggedUserViewModel by activityViewModels()
 
@@ -76,13 +72,8 @@ class EditFragment : Fragment() {
     @SuppressLint("SuspiciousIndentation")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val userName = getUserIdFromLocalStorage()
 
-        // Ovo sam dodala
-        val user = loggedUserViewModel.user
-        var userName: String = ""
-        if (user != null) {
-            userName = user.username
-        }
 
         var addButton: Button = requireView().findViewById(R.id.editmyplace_finished_button)
 
@@ -102,11 +93,14 @@ class EditFragment : Fragment() {
         }
         locationViewModel.latitude.observe(viewLifecycleOwner, latObserver)
 
-        // Dodato
         val editAutor: EditText = requireView().findViewById<EditText>(R.id.editmyplace_autor_edit)
         val ratGrade: RatingBar = requireView().findViewById(R.id.ratingBar)
         //
-
+        val setButton: Button = requireView().findViewById(R.id.editmyplace_location_button)
+        setButton.setOnClickListener{
+            locationViewModel.setLocation=true
+            findNavController().navigate(R.id.action_EditFragment_to_MapFragment)
+        }
         if (myPlacesViewModel.selected != null) {
             addButton.isEnabled = true
             editName.setText(myPlacesViewModel.selected?.name)
@@ -155,10 +149,11 @@ class EditFragment : Fragment() {
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 }
             })
-            if (user != null) {
-                editAutor.setText(userName)
-            }
+
+            editAutor.setText(userName)
+
         }
+
         addButton.setOnClickListener {
             val name: String = editName.text.toString()
             val desc: String = editDesc.text.toString()
@@ -167,11 +162,13 @@ class EditFragment : Fragment() {
             val autor: String = editAutor.text.toString()
             var starsCount = 0L
             var kommCount = 0L
+
             val grades = HashMap<String, Double>()
+            val comments = HashMap<String, String>()
             val category = editCategory.text.toString()
-            if (ratGrade.rating.toDouble() != 0.0 && user != null) {
+            if (ratGrade.rating.toDouble() != 0.0 && userName != null) {
                 grades[userName] = ratGrade.rating.toDouble()
-                starsCount += 2
+                starsCount += 1
             }
 
             if (myPlacesViewModel.selected != null) {
@@ -203,6 +200,7 @@ class EditFragment : Fragment() {
                         Toast.makeText(fragmentContext, "Greška pri ažuriranju dokumenta", Toast.LENGTH_LONG).show()
 
                     }
+               // Navigation.findNavController(binding.root).navigate(R.id.action_EditFragment_to_HomeFragment)
             } else {
                 var Place =
                     MyPlaces(
@@ -235,6 +233,7 @@ class EditFragment : Fragment() {
                     "description" to desc,
                     "url" to "",
                     "grades" to grades,
+                    "comments" to comments,
                     "geohash" to hash,
                     "category" to category
                 )
@@ -300,6 +299,34 @@ class EditFragment : Fragment() {
                                 .addOnFailureListener {
 
                                 }
+                            db.getReference("Users").orderByChild("username").equalTo(userName).addListenerForSingleValueEvent(object :
+                                ValueEventListener {
+                                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                    for (userSnapshot in dataSnapshot.children) {
+                                        val documentRef = db.getReference("Users").child(userSnapshot.key!!)
+                                        val addCount = userSnapshot.child("addCount").getValue(Long::class.java) ?: 0L
+                                        starsCount += userSnapshot.child("starsCount").getValue(Long::class.java) ?: 0L
+                                        val noviPodaci = hashMapOf<String, Any>(
+                                            "addCount" to (addCount + 1L),
+                                            "starsCount" to starsCount
+                                        )
+                                        documentRef.updateChildren(noviPodaci)
+                                            .addOnSuccessListener {
+                                                Toast.makeText(context,"Uspesno ste dodali lokaciju!", Toast.LENGTH_SHORT).show()
+                                            }
+                                            .addOnFailureListener { exception ->
+                                                Log.w("TAGA", "Error", exception)
+                                            }
+                                    }
+                                }
+
+                                override fun onCancelled(databaseError: DatabaseError) {
+                                    Log.w("TAGA", "Error", databaseError.toException())
+                                }
+                            })
+                            myPlacesViewModel.selected = null
+                            findNavController().popBackStack()
+
                         } else
                             Toast.makeText(
                                 context,
@@ -316,6 +343,7 @@ class EditFragment : Fragment() {
         val cancelButton: Button = requireView().findViewById<Button>(R.id.editmyplace_cancel_button)
         cancelButton.setOnClickListener {
             myPlacesViewModel.selected = null
+            locationViewModel.setLocation("","")
             findNavController().popBackStack()
         }
 
@@ -340,7 +368,13 @@ class EditFragment : Fragment() {
 
         val galleryButton: Button = requireView().findViewById(R.id.btnGalerija)
         galleryButton.setOnClickListener {
-            val galleryPermission = android.Manifest.permission.READ_EXTERNAL_STORAGE
+            val intent = Intent()
+            intent.type = "image/*"
+            intent.action = Intent.ACTION_GET_CONTENT
+            startActivityForResult(Intent.createChooser(intent, "Select Image"),
+                RegisterFragment.PICK_IMAGE_REQUEST
+            )
+          /*  val galleryPermission = android.Manifest.permission.READ_EXTERNAL_STORAGE
             val hasGalleryPermission = ContextCompat.checkSelfPermission(
                 requireContext(),
                 galleryPermission
@@ -355,7 +389,7 @@ class EditFragment : Fragment() {
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                     ), GALLERY_REQUEST_CODE
                 )
-            }
+            }*/
         }
 
         val cameraButton: Button = requireView().findViewById(R.id.btnCamera)
@@ -388,11 +422,15 @@ class EditFragment : Fragment() {
             GALLERY_REQUEST_CODE = 0
         }
     }
+    private fun getUserIdFromLocalStorage(): String? {
+        val sharedPreferences = context?.getSharedPreferences("TourApp", Context.MODE_PRIVATE)
+        return sharedPreferences?.getString("userId", null)
+    }
 
 
     override fun onDestroyView() {
-        super.onDestroyView()
         myPlacesViewModel.selected = null
+        super.onDestroyView()
     }
 
     override fun onCreateView(

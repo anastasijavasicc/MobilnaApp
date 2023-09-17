@@ -74,7 +74,7 @@ class RegisterFragment : Fragment() {
             otvoriGaleriju()
         }
         binding.regbtnKamera.setOnClickListener{
-          //  otvoriKameru()
+            otvoriKameru()
         }
         binding.regbtnReg.setOnClickListener{
             register() }
@@ -196,12 +196,33 @@ class RegisterFragment : Fragment() {
         startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE_REQUEST)
 
     }
-    /*
-    private fun otvoriKameru()
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), CAMERA_REQUEST_CODE)
+        } else {
+            // Do something if permission is denied
+        }
+    }
+
+    private fun otvoriKameru() {
+        val cameraPermission = android.Manifest.permission.CAMERA
+        val hasCameraPermission = ContextCompat.checkSelfPermission(
+            requireContext(),
+            cameraPermission
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (!hasCameraPermission) {
+            requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+        } else {
+            startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), CAMERA_REQUEST_CODE)
+        }
+    }
+
+    /* private fun otvoriKameru()
     {
             val cameraPermission = android.Manifest.permission.CAMERA
             val hasCameraPermission = ContextCompat.checkSelfPermission(
-                this,
+                context,
                 cameraPermission
             ) == PackageManager.PERMISSION_GRANTED
             CAMERA_REQUEST_CODE = 1
@@ -212,7 +233,7 @@ class RegisterFragment : Fragment() {
             }
 
 
-    }*/
+    }
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
@@ -231,7 +252,7 @@ class RegisterFragment : Fragment() {
                     )
                 }
             }
-        }
+        }*/
     private fun hashPassword(password: String): String {
         val md = MessageDigest.getInstance("SHA-256")
         val hashedBytes = md.digest(password.toByteArray(Charsets.UTF_8))

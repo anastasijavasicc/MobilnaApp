@@ -100,6 +100,12 @@
         <action
             android:id="@+id/action_ViewFragment_to_ListFragment"
             app:destination="@id/ListFragment" />
+        <action
+            android:id="@+id/action_ViewFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
+        <action
+            android:id="@+id/action_ViewFragment_to_RankFragment"
+            app:destination="@id/RankFragment" />
 
     </fragment>
     <fragment

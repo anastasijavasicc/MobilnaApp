@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
@@ -43,6 +44,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
+import java.io.FileNotFoundException
+import java.io.InputStream
+import java.util.*
+import kotlin.collections.HashMap
 
 
 class EditFragment : Fragment() {
@@ -59,6 +64,7 @@ class EditFragment : Fragment() {
     private val storage = Firebase.storage
     private var storageRef = storage.reference
     private lateinit var databasePlace: DatabaseReference
+    private var selectedImageUri: Uri? = null
    // var userName: String = UserObject.username!!
 
     private val loggedUserViewModel: LoggedUserViewModel by activityViewModels()
@@ -84,6 +90,7 @@ class EditFragment : Fragment() {
         val lonObserver = Observer<String> { newValue ->
             editLongitude.setText(newValue.toString())
         }
+
         locationViewModel.longitude.observe(viewLifecycleOwner, lonObserver)
 
         val editLatitude: EditText = requireView().findViewById(R.id.editmyplace_latitude_label)
@@ -210,7 +217,7 @@ class EditFragment : Fragment() {
                         latitude,
                         autor,
                         grades,
-                        HashMap(),
+                        comments,
                         desc,
                         category,
                         ""
@@ -372,7 +379,7 @@ class EditFragment : Fragment() {
             intent.type = "image/*"
             intent.action = Intent.ACTION_GET_CONTENT
             startActivityForResult(Intent.createChooser(intent, "Select Image"),
-                RegisterFragment.PICK_IMAGE_REQUEST
+                EditFragment.PICK_IMAGE_REQUEST
             )
           /*  val galleryPermission = android.Manifest.permission.READ_EXTERNAL_STORAGE
             val hasGalleryPermission = ContextCompat.checkSelfPermission(
@@ -411,7 +418,20 @@ class EditFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         val imageView: ImageView = requireView().findViewById<ImageView>(R.id.EditFragmentImg)
+        if (requestCode == RegisterFragment.PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.data != null) {
+            selectedImageUri = data.data!!
+            try
+            {
+                val imageStream: InputStream? = requireActivity().contentResolver.openInputStream(selectedImageUri!!)
+                val selectedImageBitmap = BitmapFactory.decodeStream(imageStream)
+                imageView.setImageBitmap(selectedImageBitmap)
 
+            }
+            catch(e: FileNotFoundException)
+            {
+                e.printStackTrace();
+            }
+        }
         if (requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             val image: Bitmap? = data.extras?.get("data") as Bitmap
             imageView.setImageBitmap(image)
@@ -440,6 +460,9 @@ class EditFragment : Fragment() {
         // Inflate the layout for this fragment
         _binding = FragmentEditBinding.inflate(inflater, container, false)
         return binding.root
+    }
+    companion object {
+        const val PICK_IMAGE_REQUEST = 1
     }
 
     override fun onDestroy() {

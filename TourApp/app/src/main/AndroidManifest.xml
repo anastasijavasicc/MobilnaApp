@@ -26,6 +26,7 @@
         android:label="TourApp"
         android:supportsRtl="true"
         android:theme="@style/Theme.TourApp"
+        android:enableOnBackInvokedCallback="true"
         tools:targetApi="31">
 
         <activity
@@ -46,7 +47,9 @@
 
         <meta-data
             android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" />
+            android:resource="@array/preloaded_fonts"
+            android:value="androidx.lifecycle.ViewModelProvider$NewInstanceFactory" />
+        />
     </application>
 
 </manifest>

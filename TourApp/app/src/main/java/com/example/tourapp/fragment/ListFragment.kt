@@ -1,5 +1,6 @@
 package com.example.tourapp.fragment
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -9,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView.AdapterContextMenuInfo
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.tourapp.R
@@ -49,6 +51,54 @@ class ListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         getList()
+        val radioGroup: RadioGroup = view.findViewById(R.id.rgTable)
+        radioGroup.setOnCheckedChangeListener { group, checkedId ->
+            when (checkedId) {
+                R.id.rbAutorTabela -> {
+                    searchType = "autor"
+
+                }
+                R.id.rbTip -> {
+                    searchType = "tip"
+                }
+                R.id.rbGrade -> {
+                    searchType = "ocena"
+
+                }
+
+            }
+
+
+        }
+
+
+        for (i in 0 until radioGroup.childCount) {
+            val radioButton: RadioButton = radioGroup.getChildAt(i) as RadioButton
+            radioButton.setOnClickListener {
+                if (lastCheckedRadioButton == radioButton) {
+                    radioGroup.clearCheck()
+                    lastCheckedRadioButton = null
+                } else {
+                    lastCheckedRadioButton = radioButton
+                    radioButton.isChecked = true
+                }
+            }
+        }
+
+        var btn2: Button = binding.button3
+
+        btn2.setOnClickListener {
+            radioGroup.clearCheck()
+            getList()
+        }
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                findNavController().navigate(R.id.action_ListFragment_to_HomeFragment)
+            }
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
+
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
@@ -90,10 +140,7 @@ class ListFragment : Fragment() {
         super.onPrepareOptionsMenu(menu)
 
     }
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
@@ -174,7 +221,11 @@ class ListFragment : Fragment() {
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 myPlacesViewModel.myPlacesList.addAll(listCreating(snapshot))
-                showList(requireView(), myPlacesViewModel.myPlacesList)
+                //showList(requireView(), myPlacesViewModel.myPlacesList)
+                val fragmentView = view
+                if (fragmentView != null) {
+                    showList(fragmentView, myPlacesViewModel.myPlacesList)
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -199,6 +250,12 @@ class ListFragment : Fragment() {
             override fun onItemClick(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 var myPlace: MyPlaces = p0?.adapter?.getItem(p2) as MyPlaces
                 myPlacesViewModel.selected = myPlace
+
+                val sharedPreferences = context?.getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE)
+                val editor = sharedPreferences?.edit()
+                editor?.putString("myPlaceId", myPlace.id)
+                editor?.apply()
+
                 findNavController().navigate(R.id.action_ListFragment_to_ViewFragment)
 
             }
@@ -208,6 +265,11 @@ class ListFragment : Fragment() {
         listView.setOnItemLongClickListener { parent, view, position, id ->
             var myPlace: MyPlaces = parent?.adapter?.getItem(position) as MyPlaces
             myPlacesViewModel.selected = myPlace
+
+            val sharedPreferences = context?.getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE)
+            val editor = sharedPreferences?.edit()
+            editor?.putString("myPlaceId", myPlace.id)
+            editor?.apply()
 
             showPopupMenu(view, position)
             true
@@ -219,7 +281,7 @@ class ListFragment : Fragment() {
     fun getAndShowFiltredList(field: String, query: String, category: Int) {
         myPlacesViewModel.myPlacesList.clear()
 
-
+        var list : kotlin.collections.ArrayList<MyPlaces> = ArrayList()
         CoroutineScope(Dispatchers.Main).launch {
             try {
                 var result: DataSnapshot
@@ -228,8 +290,10 @@ class ListFragment : Fragment() {
                         database.get().await()
 
                     }
-                    for (document in result.children) {
-                        var data = document.value as Map<*, *>?
+
+
+                    for(placeSnapshot in result.children){
+                        var data = placeSnapshot.value as Map<*, *>?
                         var grades = HashMap<String, Double>()
                         var sum: Double = 0.0
                         if (data?.get("grades") != null) {
@@ -249,9 +313,9 @@ class ListFragment : Fragment() {
                         var url: String =
                             "places/${data?.get("name")}${data?.get("latitude")}${data?.get("longitude")}.jpg"
                         if (sum >= query.toDouble())
-                            myPlacesViewModel
-                                .addPlace(
-                                    MyPlaces(
+                            //myPlacesViewModel
+                               // .addPlace(
+                                    list.add(MyPlaces(
                                         data?.get("name")?.toString() ?: "",
                                         data?.get("description")?.toString() ?: "",
                                         data?.get("longitude")?.toString() ?: "",
@@ -261,14 +325,13 @@ class ListFragment : Fragment() {
                                         comments,
                                         url,
                                         data?.get("category")?.toString() ?: "",
-                                        document.key.toString()
+                                        placeSnapshot.key.toString()
 
-                                    )
-                                )
+                                    ))
 
                     }
 
-                    showList(requireView(), myPlacesViewModel.myPlacesList)
+                    showList(requireView(), list)//myPlacesViewModel.myPlacesList)
 
                 } else {
                         if (category == 0) {
@@ -351,5 +414,14 @@ class ListFragment : Fragment() {
         }
 
         popupMenu.show()
+    }
+    private fun saveLoginState(userId: String) {
+        val sharedPreferences = requireContext().getSharedPreferences("TourApp", Context.MODE_PRIVATE)
+        sharedPreferences.edit().putBoolean("isLoggedIn", true).apply()
+        sharedPreferences.edit().putString("userId",userId ).apply()
+    }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -106,8 +106,21 @@ class EditFragment : Fragment() {
         val setButton: Button = requireView().findViewById(R.id.editmyplace_location_button)
         setButton.setOnClickListener{
             locationViewModel.setLocation=true
+            ///
+            val sharedPref = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
+            val editor = sharedPref.edit()
+            editor.putBoolean("myFlag", true)
+            editor.apply()
+            ///
             findNavController().navigate(R.id.action_EditFragment_to_MapFragment)
         }
+        val sharedPref = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
+        val editor = sharedPref.edit()
+        editor.putBoolean("myFlag", false)
+        editor.apply()
+
         if (myPlacesViewModel.selected != null) {
             addButton.isEnabled = true
             editName.setText(myPlacesViewModel.selected?.name)
@@ -177,6 +190,7 @@ class EditFragment : Fragment() {
                 grades[userName] = ratGrade.rating.toDouble()
                 starsCount += 1
             }
+
 
             if (myPlacesViewModel.selected != null) {
                 myPlacesViewModel.selected?.name = name
@@ -413,6 +427,7 @@ class EditFragment : Fragment() {
                 startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), CAMERA_REQUEST_CODE)
             }
         }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -452,6 +467,7 @@ class EditFragment : Fragment() {
         myPlacesViewModel.selected = null
         super.onDestroyView()
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

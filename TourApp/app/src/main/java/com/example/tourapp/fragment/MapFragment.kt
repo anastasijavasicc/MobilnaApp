@@ -9,10 +9,7 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
 import android.view.*
-import android.widget.Button
-import android.widget.RadioButton
-import android.widget.RadioGroup
-import android.widget.SearchView
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.res.ResourcesCompat
@@ -482,22 +479,115 @@ class MapFragment : Fragment(), ILocationClient {
     }
 
     private fun setOnMapClickOverlay(){
-        var receive = object: MapEventsReceiver{
-            override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
-                var lon = p?.longitude.toString()
-                var lat = p?.latitude.toString()
-                locationViewModel.setLocation(lon,lat)
-                findNavController().popBackStack()
-                return true
-            }
+        val sharedPref = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val myFlag = sharedPref.getBoolean("myFlag", false)
+        if(myFlag == true) {
+            var receive = object : MapEventsReceiver {
+                override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
+                    var lon = p?.longitude.toString()
+                    var lat = p?.latitude.toString()
+                    locationViewModel.setLocation(lon, lat)
+                    findNavController().popBackStack()
+                    return true
+                }
 
-            override fun longPressHelper(p: GeoPoint?): Boolean {
-                return false
+                override fun longPressHelper(p: GeoPoint?): Boolean {
+                    return false
+                }
+            }
+            var overlayEvents = MapEventsOverlay(receive)
+            map.overlays.add(overlayEvents)
+        }
+        else{
+            val receive = object : MapEventsReceiver {
+                override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
+                    val lon = p?.longitude.toString()
+                    val lat = p?.latitude.toString()
+
+                    // Provera da li se mesto nalazi unutar radijusa od 200 metara
+                    //val location = MainActivity.currentLocation
+
+                    //val myLocation = GeoLocation(location.latitude, location.longitude)
+                    val clickedLocation = GeoLocation(lat.toDouble(), lon.toDouble())
+                    //val distance = GeoFireUtils.getDistanceBetween(myLocation, clickedLocation)
+                    val radiusMeters = 200.0
+                    val placesWithinRadius = mutableListOf<MyPlaces>()
+                    for (place in myPlacesViewModel.myPlacesList) {
+                        val distance = calculateDistance(
+                            clickedLocation.latitude, clickedLocation.longitude,
+                            place.latitude.toDouble(), place.longitude.toDouble()
+                        )
+
+                        if (distance <= 200) {
+                            // Mesto je unutar radijusa od 200 metara
+                            placesWithinRadius.add(place)
+                        }
+                    }
+                    if(placesWithinRadius.isEmpty())
+                    {
+                        showToast("Izaberite lokaciju unutar radijusa od 200 metara.")
+                    }
+                    // Mesto je unutar radijusa, dodajte ga u lokalno skladište i otvorite ViewFragment
+                    val placeId = findPlaceIdByCoordinates(lat.toDouble(), lon.toDouble(), 200.0)
+                    if (placeId != null) {
+                        // Mesto postoji, dodajte ga u lokalno skladište
+                        myPlacesViewModel.selected = findPlaceById(placeId)
+                        findNavController().navigate(R.id.action_MapFragment_to_ViewFragment)
+                    } else {
+                        // Mesto ne postoji, prikažite poruku korisniku
+                        showToast("Na ovoj lokaciji ne postoji dodato mesto.")
+                    }
+
+
+                    return true;
+                }
+                override fun longPressHelper(p: GeoPoint?): Boolean {
+                    return false
+                }
+            }
+            val overlayEvents = MapEventsOverlay(receive)
+            map.overlays.add(overlayEvents)
+        }
+
+    }
+    private fun showToast(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+   /* private fun findPlaceIdByCoordinates(latitude: String, longitude: String): String? {
+        val place = myPlacesViewModel.myPlacesList.find { it.latitude == latitude && it.longitude == longitude }
+        Log.w("TAG","Mesto na koje si kliknula: ${place?.name}")
+        return place?.id
+    }*/
+    private fun findPlaceById(placeId: String): MyPlaces? {
+        return myPlacesViewModel.myPlacesList.find { it.id == placeId }
+    }
+    private fun findPlaceIdByCoordinates(latitude: Double, longitude: Double, radiusMeters: Double): String? {
+        //val placesInRadius = mutableListOf<MyPlaces>()
+
+        for (place in myPlacesViewModel.myPlacesList) {
+            val placeLatitude = place.latitude.toDouble()
+            val placeLongitude = place.longitude.toDouble()
+            val distance = calculateDistance(latitude, longitude, placeLatitude, placeLongitude)
+
+            if (distance <= radiusMeters) {
+                return place.id
             }
         }
-        var overlayEvents = MapEventsOverlay(receive)
-        map.overlays.add(overlayEvents)
+
+        return null
     }
+    private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val r = 6371000.0 // Prosečni poluprečnik Zemlje u metrima
+        val dLat = Math.toRadians(lat2 - lat1)
+        val dLon = Math.toRadians(lon2 - lon1)
+        val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2)
+        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+        return r * c // Udaljenost između tačaka u metrima
+    }
+
+
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)

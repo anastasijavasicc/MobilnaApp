@@ -129,6 +129,12 @@
             android:id="@+id/action_MapFragment_to_LoginFragment"
             app:destination="@id/LoginFragment" />
         <action
+            android:id="@+id/action_MapFragment_to_RankFragment"
+            app:destination="@id/RankFragment" />
+        <action
+            android:id="@+id/action_MapFragment_to_ViewFragment"
+            app:destination="@id/ViewFragment" />
+        <action
         android:id="@+id/action_MapFragment_to_HomeFragment"
         app:destination="@id/HomeFragment" />
 

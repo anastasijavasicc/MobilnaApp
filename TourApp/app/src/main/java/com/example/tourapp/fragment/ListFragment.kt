@@ -1,6 +1,7 @@
 package com.example.tourapp.fragment
 
 import android.content.Context
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -14,21 +15,29 @@ import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.tourapp.R
+import com.example.tourapp.activity.MainActivity
+import com.example.tourapp.data.ILocationClient
 import com.example.tourapp.data.MyPlaces
 import com.example.tourapp.data.User
 import com.example.tourapp.data.UserObject
 import com.example.tourapp.databinding.FragmentListBinding
+import com.example.tourapp.model.LocationViewModel
 import com.example.tourapp.model.MyPlacesListAdapter
 import com.example.tourapp.model.MyPlacesViewModel
+import com.firebase.geofire.GeoFireUtils
+import com.firebase.geofire.GeoLocation
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.database.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import org.osmdroid.util.GeoPoint
 import java.util.*
 
-class ListFragment : Fragment() {
+class ListFragment : Fragment(), ILocationClient {
 
     private var _binding: FragmentListBinding? = null
     private val binding get() = _binding!!
@@ -38,6 +47,7 @@ class ListFragment : Fragment() {
     private var userName: String = UserObject.username.toString()
     private lateinit var myUser: User
     var lastCheckedRadioButton: RadioButton? = null
+    private val locationViewModel: LocationViewModel by activityViewModels()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -49,7 +59,7 @@ class ListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        MainActivity.iLocationClient = this
         getList()
         val radioGroup: RadioGroup = view.findViewById(R.id.rgTable)
         radioGroup.setOnCheckedChangeListener { group, checkedId ->
@@ -64,6 +74,9 @@ class ListFragment : Fragment() {
                 R.id.rbGrade -> {
                     searchType = "grade"
 
+                }
+                R.id.rbRadius -> {
+                    searchType = "radius"
                 }
 
             }
@@ -229,9 +242,9 @@ class ListFragment : Fragment() {
                 myPlacesViewModel.myPlacesList.addAll(listCreating(snapshot))
                 //showList(requireView(), myPlacesViewModel.myPlacesList)
                 val fragmentView = view
-               // if (fragmentView != null) {
-                    showList(requireView(), myPlacesViewModel.myPlacesList)
-                //}
+                if (fragmentView != null) {
+                showList(fragmentView, myPlacesViewModel.myPlacesList)
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -291,7 +304,86 @@ class ListFragment : Fragment() {
             CoroutineScope(Dispatchers.Main).launch {
                 try {
                     var snapshot: DataSnapshot
-                    if (field.equals("grade")) {
+                    if(field == "radius"){
+                        val location = MainActivity.currentLocation
+                        var center: GeoLocation = if (location == null)
+                            GeoLocation(43.32289, 21.8925)
+                        else
+                            GeoLocation(location.latitude, location.longitude)
+
+                        val radius = value.toDouble()
+
+                        val bounds = GeoFireUtils.getGeoHashQueryBounds(center, radius)
+                        val tasks: MutableList<Task<DataSnapshot>> = ArrayList()
+                        for (b in bounds) {
+                            val q = database.orderByChild("geohash").startAt(b.startHash)
+                                .endAt(b.endHash)
+                            val task = q.get()
+                            tasks.add(task)
+                        }
+
+                        Tasks.whenAllComplete(tasks)
+                            .addOnCompleteListener { taskList ->
+                                val matchingDocuments: MutableList<DataSnapshot> = ArrayList()
+                                for (task in tasks) {
+                                    if (task.isSuccessful) {
+                                        val snapshot = task.result
+                                        for (childSnapshot in snapshot!!.children) {
+                                            val lat = childSnapshot.child("latitude").getValue(String::class.java) ?: ""
+                                            val lng = childSnapshot.child("longitude").getValue(String::class.java) ?: ""
+                                            val docLocation = GeoLocation(lat.toDouble(), lng.toDouble())
+                                            val distance = GeoFireUtils.getDistanceBetween(docLocation, center)
+                                            if (distance <= radius)
+                                                matchingDocuments.add(childSnapshot)
+                                        }
+                                    } else {
+                                        // Handle the error here
+                                        val exception = task.exception
+                                        Log.e("FirebaseError", "Error getting data: $exception")
+                                    }
+
+                                    for (document in matchingDocuments) {
+                                        var data = document.value as Map<String, Any>
+                                        var grades = HashMap<String, Double>()
+                                        if (data?.get("grades") != null) {
+                                            for (g in data["grades"] as HashMap<String, Double>)
+                                                grades[g.key] = g.value
+                                        }
+                                        var comments = HashMap<String, String>()
+                                        if (data?.get("comments") != null) {
+
+
+                                            for (c in data["comments"] as HashMap<String, String>)
+                                                comments[c.key] = c.value
+                                        }
+
+                                        var url: String =
+                                            "places/${data["name"]}${data["latitude"]}${data["longitude"]}.jpg"
+                                        myPlacesViewModel
+                                            .addPlace(
+                                                MyPlaces(
+                                                    data["name"].toString(),
+                                                    data["description"].toString(),
+                                                    data["latitude"].toString(),
+                                                    data["longitude"].toString(),
+                                                    data["autor"].toString(),
+                                                    grades,
+                                                    comments,
+                                                    url,
+                                                    data["category"].toString(),
+                                                    ""
+                                                )
+                                            )
+
+                                    }
+
+                                    showList(requireView(),myPlacesViewModel.myPlacesList)
+                                }
+                            }
+
+                    }
+                    else
+                        if (field.equals("grade")) {
                         val snapshot = withContext(Dispatchers.IO) {
                             database.get().await()
                         }
@@ -412,5 +504,9 @@ class ListFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onNewLocation(location: Location) {
+
     }
 }

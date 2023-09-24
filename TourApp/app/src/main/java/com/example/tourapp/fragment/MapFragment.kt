@@ -1,5 +1,6 @@
 package com.example.tourapp.fragment
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -116,7 +117,7 @@ class MapFragment : Fragment(), ILocationClient {
         }
         binding.btnOk.setOnClickListener{
             //filter()
-            onResume()
+           // onResume()
         }
         for (i in 0 until radioGroup.childCount) {
             val radioButton: RadioButton = radioGroup.getChildAt(i) as RadioButton
@@ -165,6 +166,7 @@ class MapFragment : Fragment(), ILocationClient {
        // map.controller.setCenter(startPoint)
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private fun setupMap(list: ArrayList<MyPlaces>){
         removeAllMarkers(map)
 
@@ -198,6 +200,7 @@ class MapFragment : Fragment(), ILocationClient {
             }
         }
 
+
         val location = MainActivity.currentLocation
         var startPoint: GeoPoint = if (location == null)
             GeoPoint(43.32289, 21.8925)
@@ -216,13 +219,50 @@ class MapFragment : Fragment(), ILocationClient {
 
         list.forEach { place ->
             val marker = Marker(map)
-            marker.position = GeoPoint(place.latitude.toDouble(), place.longitude.toDouble())
-            marker.title = place.name
+            val drawableP = resources.getDrawable(R.drawable.baseline_location_on_24, null)
+
+
+            marker.apply {
+                this.position = GeoPoint(place.longitude.toDouble(), place.latitude.toDouble())
+                Log.w("TAGA","LOKACIJA: ${this.position.latitude}, ${this.position.longitude}")
+                this.title = place.name
+                setAnchor(Marker.ANCHOR_CENTER, 1.0f)
+                setOnMarkerClickListener { _, _ ->
+                    val clickedLocation = this.position
+
+                    val placeId = findPlaceIdByCoordinates(clickedLocation.longitude, clickedLocation.latitude, 200.0)
+                    Log.w("TAGA","Mesto na lokaciji: ${placeId}")
+                    if (placeId != null) {
+                        // Mesto postoji, dodajte ga u lokalno skladište
+                        myPlacesViewModel.selected = findPlaceById(placeId)
+                        Log.w("TAGA","Mesto koje je selektovano i nadjeno: ${myPlacesViewModel.selected}")
+                        findNavController().navigate(R.id.action_MapFragment_to_ViewFragment)
+                    } else {
+                        // Mesto ne postoji, prikažite poruku korisniku
+                        showToast("Na ovoj lokaciji ne postoji dodato mesto.")
+                    }
+                    true
+                }
+                drawableP?.toBitmap()?.let { bitmap ->
+                    icon = BitmapDrawable(
+                        resources,
+                        Bitmap.createScaledBitmap(
+                            bitmap,
+                            ((40.0f * resources.displayMetrics.density).toInt()),
+                            ((40.0f * resources.displayMetrics.density).toInt()),
+                            true
+                        )
+                    )
+                }
+            }
+
+            // marker.position = GeoPoint(place.latitude.toDouble(), place.longitude.toDouble())
+            // marker.title = place.name
 
             Log.w("TAGA","mesto koje odgovara filteru je ${place.name}")
-            map.invalidate()
             map.overlays.add(marker)
         }
+
 
         map.overlays.add(myMarker)
 
@@ -502,7 +542,7 @@ class MapFragment : Fragment(), ILocationClient {
             var overlayEvents = MapEventsOverlay(receive)
             map.overlays.add(overlayEvents)
         }
-        else{
+        else{/*
             val receive = object : MapEventsReceiver {
                 override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
                     val lon = p?.longitude.toString()
@@ -550,7 +590,7 @@ class MapFragment : Fragment(), ILocationClient {
                 }
             }
             val overlayEvents = MapEventsOverlay(receive)
-            map.overlays.add(overlayEvents)
+            map.overlays.add(overlayEvents)*/
         }
 
     }

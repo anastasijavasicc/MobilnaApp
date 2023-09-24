@@ -36,7 +36,8 @@ class UserListAdapter(context: Context, private val itemList: ArrayList<User>) :
         holder.itemaddCount.text = item.addCount.toString()
         holder.itemstarsCount.text = item.startCount.toString()
         holder.itemcommentsCount.text = item.commentsCount.toString()
-        holder.itempointsCount.text = (item.commentsCount + item.addCount + item.startCount).toString()
+        holder.itemtourCount.text = item.tourCount.toString()
+        holder.itempointsCount.text = (item.commentsCount + item.addCount + item.startCount + item.tourCount).toString()
 
 
 
@@ -50,6 +51,7 @@ class UserListAdapter(context: Context, private val itemList: ArrayList<User>) :
         val itemaddCount : TextView = view.findViewById(R.id.tvAddCount)
         val itemstarsCount : TextView = view.findViewById(R.id.tvStarsCount)
         val itemcommentsCount : TextView = view.findViewById(R.id.tvCommentsCountr)
+        val itemtourCount: TextView = view.findViewById(R.id.tvTourCountr)
         val itempointsCount : TextView = view.findViewById(R.id.tvPointsCountr)
 
 

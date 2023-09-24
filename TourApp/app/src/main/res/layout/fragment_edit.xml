@@ -191,15 +191,26 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="30dp"
-                android:layout_marginTop="15dp"
                 android:layout_marginEnd="30dp"
                 android:layout_marginBottom="15dp"
                 android:layout_weight="2"
                 android:text="@string/editmyplace_button_set_coordinates"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/btnMyLoc"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/ll_l"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <Button
+                android:id="@+id/btnMyLoc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="My loc"
+                tools:layout_editor_absoluteX="244dp"
+                app:layout_constraintTop_toBottomOf="@id/editmyplace_location_button"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ll_l"
+                tools:layout_editor_absoluteY="43dp" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 

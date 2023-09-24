@@ -33,11 +33,12 @@
                 android:id="@+id/btnPrikaziList"
                 android:layout_width="420dp"
                 android:layout_height="60dp"
-                android:layout_marginTop="100dp"
+                android:layout_marginTop="130dp"
                 android:backgroundTint="#c2baae"
                 android:text="prikazi sve lokacije"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imageView2" />
         </androidx.constraintlayout.widget.ConstraintLayout>

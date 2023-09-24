@@ -80,12 +80,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
     <TextView
         android:id="@+id/tvPointsCountr"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvPointsLayout"
@@ -99,9 +101,30 @@
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/tvPointsCountr"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvCommentsCountr"
+        app:layout_constraintTop_toBottomOf="@+id/tvTourCountr"
         />
 
+    <TextView
+        android:id="@+id/tvTourCountr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/tvPointsLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvTourLayout"
+        />
+    <TextView
+        android:id="@+id/tvTourLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="Obilasci:"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/tvTourCountr"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvCommentsCountr"
+        />
 
 
     <TextView
@@ -110,8 +133,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/tvPointsLayout"
+        app:layout_constraintBottom_toTopOf="@+id/tvTourLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvCommentsLayout" />
 

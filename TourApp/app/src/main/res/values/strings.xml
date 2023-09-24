@@ -17,7 +17,7 @@
     <string name="map_fragment_label">Map</string>
     <string name="editmyplace_name_label">Name</string>
     <string name="editmyplace_desc_label">Description</string>
-    <string name="editmyplace_add_label">Add Place</string>
+    <string name="editmyplace_add_label">Add</string>
     <string name="editmyplace_cancel_label">Cancel</string>
     <string name="viewmyplace_finished_label">Close</string>
     <string name="view_fragment_label">View My Place</string>
@@ -80,4 +80,5 @@
     <string name="yourpoints">yourpoints</string>
     <string name="add_number">Add Number</string>
     <string name="info">info</string>
+    <string name="opadajuci">Opadajuci</string>
 </resources>

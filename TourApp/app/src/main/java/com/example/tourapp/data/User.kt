@@ -10,6 +10,7 @@ data class User(
     val addCount: Double,
     val startCount:Double,
     val commentsCount:Double,
+    var tourCount: Double,
     @Transient val id:String):java.io.Serializable {
 
 }

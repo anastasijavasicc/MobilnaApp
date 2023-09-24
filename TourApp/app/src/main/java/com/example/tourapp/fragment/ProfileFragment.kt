@@ -72,6 +72,7 @@ class ProfileFragment : Fragment() {
                             (data["addCount"] as? Long ?: 0.0).toDouble(),
                             (data["starsCount"] as? Long ?: 0.0).toDouble(),
                             (data["commentsCount"] as? Long ?: 0.0).toDouble(),
+                            (data["tourCount"] as? Long ?: 0.0).toDouble(),
                             snapshot.key.toString()
                         )
                         val dd = snapshot.key
@@ -99,10 +100,10 @@ class ProfileFragment : Fragment() {
             val pointss:TextView = requireView().findViewById(R.id.point_display)
             val profileImageImageView: ImageView = requireView().findViewById(R.id.profile_image)
             val phone: TextView = requireView().findViewById(R.id.phone_display)
-            val poeniUkupno = user.addCount+user.commentsCount
+            val poeniUkupno = user.addCount+user.commentsCount + user.startCount + user.tourCount!!
             nameDisplayTextView.text = user.firstName
             surnameDisplayTextView.text = user.lastName
-            pointss.text = (user.addCount + user.commentsCount + user.startCount).toString()
+            pointss.text = (user.addCount + user.commentsCount + user.startCount + user.tourCount).toString()
             phone.text = user.phoneNumber
             Glide.with(view.context)
                 .load(user.profilePhotoUrl)

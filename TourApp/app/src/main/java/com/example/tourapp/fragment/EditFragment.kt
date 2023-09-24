@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -27,6 +28,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.example.tourapp.R
 import com.example.tourapp.activity.MainActivity
+import com.example.tourapp.data.ILocationClient
 import com.example.tourapp.data.MyPlaces
 import com.example.tourapp.databinding.FragmentEditBinding
 import com.example.tourapp.model.LocationViewModel
@@ -50,7 +52,7 @@ import java.util.*
 import kotlin.collections.HashMap
 
 
-class EditFragment : Fragment() {
+class EditFragment : Fragment(), ILocationClient {
 
     private var _binding: FragmentEditBinding? = null
     private val binding get() = _binding!!
@@ -104,6 +106,7 @@ class EditFragment : Fragment() {
         val ratGrade: RatingBar = requireView().findViewById(R.id.ratingBar)
         //
         val setButton: Button = requireView().findViewById(R.id.editmyplace_location_button)
+        val myLocButton: Button = requireView().findViewById(R.id.btnMyLoc)
         setButton.setOnClickListener{
             locationViewModel.setLocation=true
             ///
@@ -114,6 +117,11 @@ class EditFragment : Fragment() {
             editor.apply()
             ///
             findNavController().navigate(R.id.action_EditFragment_to_MapFragment)
+        }
+        myLocButton.setOnClickListener {
+            MainActivity.iLocationClient = this
+            val location = MainActivity.currentLocation
+            locationViewModel.setLocation(location?.longitude.toString(), location?.latitude.toString())
         }
         val sharedPref = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
@@ -182,6 +190,7 @@ class EditFragment : Fragment() {
             val autor: String = editAutor.text.toString()
             var starsCount = 0L
             var kommCount = 0L
+            var tourCount = 0L
 
             val grades = HashMap<String, Double>()
             val comments = HashMap<String, String>()
@@ -327,8 +336,10 @@ class EditFragment : Fragment() {
                                         val documentRef = db.getReference("Users").child(userSnapshot.key!!)
                                         val addCount = userSnapshot.child("addCount").getValue(Long::class.java) ?: 0L
                                         starsCount += userSnapshot.child("starsCount").getValue(Long::class.java) ?: 0L
+                                        tourCount = userSnapshot.child("tourCount").getValue(Long::class.java) ?: 0L
                                         val noviPodaci = hashMapOf<String, Any>(
                                             "addCount" to (addCount + 1L),
+                                            "tourCount" to (tourCount + 1L),
                                             "starsCount" to starsCount
                                         )
                                         documentRef.updateChildren(noviPodaci)
@@ -484,6 +495,10 @@ class EditFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
+    }
+
+    override fun onNewLocation(location: Location) {
+        TODO("Not yet implemented")
     }
 }
 

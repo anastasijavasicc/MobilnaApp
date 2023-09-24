@@ -79,13 +79,14 @@ class UsersFragment : Fragment() {
                             (data["addCount"] as? Long ?: 0.0).toDouble(),
                             (data["starsCount"] as? Long ?: 0.0).toDouble(),
                             (data["commentsCount"] as? Long ?: 0.0).toDouble(),
+                            (data["tourCount"] as? Long ?: 0.0).toDouble(),
                             snapshot.key.toString()
                         )
                         //var zbir = user.addCount + user.commentsCount + user.startCount
 
                         list.add(user)
                     }
-                    list.sortBy { it.addCount + it.commentsCount + it.startCount }    //.sortedBy { it.addCount + it.commentsCount + it.startCount }
+                    list.sortBy { it.addCount + it.commentsCount + it.startCount + it.tourCount!! }    //.sortedBy { it.addCount + it.commentsCount + it.startCount }
                     if (ascending != 1) {
                         list.reverse()
                     }

@@ -101,10 +101,19 @@ class RegisterFragment : Fragment() {
                 e.printStackTrace();
             }
         }
-        else if (requestCode == CAMERA_REQUEST_CODE && resultCode == AppCompatActivity.RESULT_OK && data != null) {
+       /* else if (requestCode == CAMERA_REQUEST_CODE && resultCode == AppCompatActivity.RESULT_OK && data != null) {
             val image: Bitmap? = data.extras?.get("data") as Bitmap
             imageView.setImageBitmap(image)
             CAMERA_REQUEST_CODE = 0
+        }*/
+        if (requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            val image: Bitmap? = data.extras?.get("data") as Bitmap
+            imageView.setImageBitmap(image)
+            CAMERA_REQUEST_CODE = 0
+        } else if (requestCode == GALLERY_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            val selectedImage: Uri? = data.data
+            imageView.setImageURI(selectedImage)
+            GALLERY_REQUEST_CODE = 0
         }
     }
     private fun register() {
@@ -140,7 +149,7 @@ class RegisterFragment : Fragment() {
 
                         fileRef.downloadUrl.addOnSuccessListener { uri ->
                             val activityObj: Activity? = this.activity
-                            val user = User(username,password,firstName, lastName,phoneNumber ,uri.toString(),0.0,0.0,0.0,id.toString())
+                            val user = User(username,password,firstName, lastName,phoneNumber ,uri.toString(),0.0,0.0,0.0,0.0,id.toString())
                             if (user.username != null) {
                                 val databaseUser = FirebaseDatabase.getInstance("https://tourapp-f60cd-default-rtdb.firebaseio.com/").getReference("Users")
                                 databaseUser.child(username).get().addOnCompleteListener { task ->
@@ -198,9 +207,19 @@ class RegisterFragment : Fragment() {
     }
     private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
         if (isGranted) {
-            startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), CAMERA_REQUEST_CODE)
-        } else {
-            // Do something if permission is denied
+            if (CAMERA_REQUEST_CODE == 1) {
+                startActivityForResult(
+                    Intent(MediaStore.ACTION_IMAGE_CAPTURE),
+                    CAMERA_REQUEST_CODE
+                )
+            } else if (GALLERY_REQUEST_CODE == 1) {
+                startActivityForResult(
+                    Intent(
+                        Intent.ACTION_PICK,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    ), GALLERY_REQUEST_CODE
+                )
+            }
         }
     }
 
@@ -210,7 +229,7 @@ class RegisterFragment : Fragment() {
             requireContext(),
             cameraPermission
         ) == PackageManager.PERMISSION_GRANTED
-
+        CAMERA_REQUEST_CODE = 1
         if (!hasCameraPermission) {
             requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
         } else {

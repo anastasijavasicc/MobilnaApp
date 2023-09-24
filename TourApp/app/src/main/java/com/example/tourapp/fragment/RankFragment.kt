@@ -89,13 +89,16 @@ class RankFragment : Fragment() {
                     val hmGrades = data?.get("grades") as? Map<String, Double>
                     val hmComments = data?.get("comments") as? Map<String, String>
 
+                    var flagGrade = 0
                     if (hmGrades?.containsKey(userName) == true) {
                         rate.rating = (hmGrades[userName] as Long).toFloat()
+                        flagGrade = 1
                        // rate.rating = hmGrades[userName]?.toFloat() ?: 0f
                     }
-
+                    var flagCom = 0
                     if (hmComments?.containsKey(userName) == true) {
                         kom.setText(hmComments[userName])
+                        flagCom = 1
                     }
 
                     val oldRate = rate.rating
@@ -115,8 +118,6 @@ class RankFragment : Fragment() {
 
 ////////////////////////////////////////////////
 
-                        val databaseReference = FirebaseDatabase.getInstance().getReference("places")
-                        val placeReference = databaseReference.child(placeId)
 
                         if(data != null){
                             data["grades"] = myPlacesViewModel.selected?.grades!!
@@ -134,6 +135,7 @@ class RankFragment : Fragment() {
                         var kommCount: Long = 0
                         if (kom.text.isNotEmpty() && oldKomm.isEmpty())
                             kommCount = 1
+                        var tourC: Long = 0
 
                         usersReference.orderByChild("username").equalTo(userName).addListenerForSingleValueEvent(object :
                             ValueEventListener {
@@ -141,11 +143,30 @@ class RankFragment : Fragment() {
                                 for (userSnapshot in dataSnapshot.children) {
                                     val documentRef = usersReference.child(userSnapshot.key!!)
                                     kommCount = userSnapshot.child("commentsCount").getValue(Long::class.java) ?: 0L
-                                    starsCount += userSnapshot.child("starsCount").getValue(Long::class.java) ?: 0L
+                                    starsCount = userSnapshot.child("starsCount").getValue(Long::class.java) ?: 0L
+                                    Log.w("TAGA","stigli smo do negde")
+                                    tourC = userSnapshot.child("tourCount").getValue(Long::class.java) ?: 0L
+                                    Log.w("TAGA","stari tour count: $tourC")
+                                    if(flagGrade==1 && flagCom == 1)
+                                    {
+
+                                    }
+                                    else if(flagGrade == 1 && flagCom == 0)
+                                    {
+                                        kommCount+=1L
+                                    }
+                                    else if(flagGrade == 0 && flagCom == 0)
+                                    {
+                                        kommCount+=1L
+                                        starsCount+=1L
+                                        tourC+=1L
+                                    }
                                     val noviPodaci = hashMapOf<String, Any>(
-                                        "commentsCount" to (kommCount + 1L),
-                                        "starsCount" to (starsCount + 1L)
+                                        "commentsCount" to (kommCount),
+                                        "starsCount" to (starsCount),
+                                        "tourCount" to (tourC)
                                     )
+
                                     documentRef.updateChildren(noviPodaci)
                                         .addOnSuccessListener {
                                             Toast.makeText(context,"Uspesno ste ocenili lokaciju!", Toast.LENGTH_SHORT).show()

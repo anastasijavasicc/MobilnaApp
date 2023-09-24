@@ -1,6 +1,7 @@
 package com.example.tourapp.model
 
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import com.example.tourapp.data.User
 
 class UserListAdapter(context: Context, private val itemList: ArrayList<User>) : ArrayAdapter<User>(context, 0, itemList) {
 
+    @SuppressLint("SetTextI18n")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         var view = convertView
         val holder: ViewHolder
@@ -34,6 +36,7 @@ class UserListAdapter(context: Context, private val itemList: ArrayList<User>) :
         holder.itemaddCount.text = item.addCount.toString()
         holder.itemstarsCount.text = item.startCount.toString()
         holder.itemcommentsCount.text = item.commentsCount.toString()
+        holder.itempointsCount.text = (item.commentsCount + item.addCount + item.startCount).toString()
 
 
 
@@ -47,6 +50,7 @@ class UserListAdapter(context: Context, private val itemList: ArrayList<User>) :
         val itemaddCount : TextView = view.findViewById(R.id.tvAddCount)
         val itemstarsCount : TextView = view.findViewById(R.id.tvStarsCount)
         val itemcommentsCount : TextView = view.findViewById(R.id.tvCommentsCountr)
+        val itempointsCount : TextView = view.findViewById(R.id.tvPointsCountr)
 
 
     }

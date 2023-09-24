@@ -12,6 +12,7 @@ import android.view.*
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
@@ -29,7 +30,9 @@ import com.firebase.geofire.GeoLocation
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,8 +42,10 @@ import org.osmdroid.views.MapView
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.ItemizedIconOverlay
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.OverlayItem
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.util.*
@@ -71,6 +76,7 @@ class MapFragment : Fragment(), ILocationClient {
         // Inflate the layout for this fragment
         _binding = FragmentMapBinding.inflate(inflater, container, false)
         //inflater.inflate(R.layout.fragment_map, container, false)
+        map = binding.map
         return binding.root
     }
 
@@ -84,7 +90,11 @@ class MapFragment : Fragment(), ILocationClient {
         var ctx: Context? = getActivity()?.getApplicationContext()
         var btn2: Button = binding.button3
 
+
+
         val radioGroup: RadioGroup = view.findViewById(R.id.rgTable)
+
+        map.overlays.add(ItemizedIconOverlay<OverlayItem>(activity, ArrayList<OverlayItem>(), null))
 
         radioGroup.setOnCheckedChangeListener { group, checkedId ->
             when (checkedId) {
@@ -103,6 +113,10 @@ class MapFragment : Fragment(), ILocationClient {
             }
 
 
+        }
+        binding.btnOk.setOnClickListener{
+            //filter()
+            onResume()
         }
         for (i in 0 until radioGroup.childCount) {
             val radioButton: RadioButton = radioGroup.getChildAt(i) as RadioButton
@@ -139,6 +153,7 @@ class MapFragment : Fragment(), ILocationClient {
             )
         }else {
             //setMyLocationOverlay()
+          //  fetchPlacesFromDatabase()
             setupMap(myPlacesViewModel.myPlacesList)
             setOnMapClickOverlay() //ovo je podrska za klik na mapu
 
@@ -149,11 +164,11 @@ class MapFragment : Fragment(), ILocationClient {
       //  val startPoint = GeoPoint(43.3209, 21.8958)
        // map.controller.setCenter(startPoint)
     }
+
     private fun setupMap(list: ArrayList<MyPlaces>){
         removeAllMarkers(map)
 
         myMarker = Marker(map)
-
 
         val drawable =
             ResourcesCompat.getDrawable(resources, org.osmdroid.library.R.drawable.person, null)
@@ -203,24 +218,13 @@ class MapFragment : Fragment(), ILocationClient {
             val marker = Marker(map)
             marker.position = GeoPoint(place.latitude.toDouble(), place.longitude.toDouble())
             marker.title = place.name
+
+            Log.w("TAGA","mesto koje odgovara filteru je ${place.name}")
+            map.invalidate()
             map.overlays.add(marker)
         }
-        map.overlays.add(myMarker)
-      /**  var startPoint:GeoPoint = GeoPoint(43.3289,21.8958)
-        map.controller.setZoom(15.0)
-        if(locationViewModel.setLocation){
-            setOnMapClickOverlay()
-        }
-        else{
-            if(myPlacesViewModel.selected !=null){
-                startPoint = GeoPoint(myPlacesViewModel.selected!!.latitude.toDouble(),myPlacesViewModel.selected!!.longitude.toDouble())
 
-            }else{
-                setMyLocationOverlay()
-            }
-        }
-        map.controller.animateTo(startPoint)
-      */
+        map.overlays.add(myMarker)
 
     }
     fun createList(snapshot: DataSnapshot): kotlin.collections.ArrayList<MyPlaces> {
@@ -553,11 +557,7 @@ class MapFragment : Fragment(), ILocationClient {
     private fun showToast(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
-   /* private fun findPlaceIdByCoordinates(latitude: String, longitude: String): String? {
-        val place = myPlacesViewModel.myPlacesList.find { it.latitude == latitude && it.longitude == longitude }
-        Log.w("TAG","Mesto na koje si kliknula: ${place?.name}")
-        return place?.id
-    }*/
+
     private fun findPlaceById(placeId: String): MyPlaces? {
         return myPlacesViewModel.myPlacesList.find { it.id == placeId }
     }

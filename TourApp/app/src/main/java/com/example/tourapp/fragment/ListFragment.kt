@@ -59,10 +59,10 @@ class ListFragment : Fragment() {
 
                 }
                 R.id.rbTip -> {
-                    searchType = "tip"
+                    searchType = "category"
                 }
                 R.id.rbGrade -> {
-                    searchType = "ocena"
+                    searchType = "grade"
 
                 }
 
@@ -91,6 +91,9 @@ class ListFragment : Fragment() {
             radioGroup.clearCheck()
             getList()
         }
+        binding.btnOk.setOnClickListener {
+            onResume()
+        }
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 findNavController().navigate(R.id.action_ListFragment_to_HomeFragment)
@@ -100,7 +103,6 @@ class ListFragment : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
 
     }
-
     override fun onContextItemSelected(item: MenuItem): Boolean {
         val info = item.menuInfo as AdapterContextMenuInfo
         if (item.itemId === 1){
@@ -150,27 +152,30 @@ class ListFragment : Fragment() {
         inflater.inflate(R.menu.menu_main, menu)
     }
 
-    override fun onResume() {
+     override fun onResume() {
         super.onResume()
         val searchView: SearchView = binding.svTable
-        searchType = "name"
+       // searchType = "name"
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
-                if (searchType.equals("grade") && query.toIntOrNull() == null)
-                    Toast.makeText(requireContext(), "Unesite broj", Toast.LENGTH_SHORT).show()
-                else
-                    getAndShowFiltredList(searchType, query, 0)
+               // if (searchType.equals("grade") && query.toIntOrNull() == null)
+               //     Toast.makeText(requireContext(), "Unesite broj", Toast.LENGTH_SHORT).show()
+              //  else {
+                    filter(searchType, query, 0)
+                   // getAndShowFiltredList(searchType, query, 0)
+               // }
                 return true
             }
 
 
             override fun onQueryTextChange(newText: String): Boolean {
                 if (newText.isNotEmpty())
-                    if (searchType.equals("grade") && newText.toIntOrNull() == null) {
+                  //  if (searchType.equals("grade") && newText.toIntOrNull() == null) {
 
-                        Toast.makeText(requireContext(), "Unesite broj", Toast.LENGTH_SHORT).show()
-                    } else
-                        getAndShowFiltredList(searchType, newText, 1)
+                     //   Toast.makeText(requireContext(), "Unesite broj", Toast.LENGTH_SHORT).show()
+                  //  } else
+                        filter(searchType, newText, 0)
+                        //getAndShowFiltredList(searchType, newText, 1)
                 else
                     getList()
                 return true
@@ -184,7 +189,7 @@ class ListFragment : Fragment() {
         for (placeSnapshot in snapshot.children) {
             //var place = placeSnapshot.getValue(MyPlaces::class.java)
            // place?.let { list.add(it) }
-            var data = placeSnapshot.value as Map<*, *>?
+            val data = placeSnapshot.value as Map<String, Any>
             var grades = HashMap<String, Double>()
             if (data?.get("grades") != null) {
                 for (g in data["grades"] as HashMap<String, Double>)
@@ -198,16 +203,17 @@ class ListFragment : Fragment() {
 
             list.add(
                 MyPlaces(
-                    data?.get("name")?.toString() ?: "",
-                    data?.get("description")?.toString() ?: "",
-                    data?.get("longitude")?.toString() ?: "",
-                    data?.get("latitude")?.toString() ?: "",
-                    data?.get("autor")?.toString()?: "",
+                    data["name"].toString(),
+                    data["description"].toString(),
+                    data["latitude"].toString(),
+                    data["longitude"].toString(),
+                    data["autor"].toString(),
                     grades,
                     comments,
-                    data?.get("url")?.toString() ?: "",
-                    data?.get("category")?.toString() ?: "",
+                    data["url"].toString(),
+                    data["category"].toString(),
                     placeSnapshot.key.toString()
+
                 )
             )
 
@@ -223,9 +229,9 @@ class ListFragment : Fragment() {
                 myPlacesViewModel.myPlacesList.addAll(listCreating(snapshot))
                 //showList(requireView(), myPlacesViewModel.myPlacesList)
                 val fragmentView = view
-                if (fragmentView != null) {
-                    showList(fragmentView, myPlacesViewModel.myPlacesList)
-                }
+               // if (fragmentView != null) {
+                    showList(requireView(), myPlacesViewModel.myPlacesList)
+                //}
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -278,98 +284,81 @@ class ListFragment : Fragment() {
 
     }
 
-    fun getAndShowFiltredList(field: String, query: String, category: Int) {
-        myPlacesViewModel.myPlacesList.clear()
+    private fun filter(field: String, value: String, type: Int){
+        if (value != "") {
+            myPlacesViewModel.myPlacesList.clear()
 
-        var list : kotlin.collections.ArrayList<MyPlaces> = ArrayList()
-        CoroutineScope(Dispatchers.Main).launch {
-            try {
-                var result: DataSnapshot
-                if (field.equals("grade")) {
-                    result = withContext(Dispatchers.IO) {
-                        database.get().await()
+            CoroutineScope(Dispatchers.Main).launch {
+                try {
+                    var snapshot: DataSnapshot
+                    if (field.equals("grade")) {
+                        val snapshot = withContext(Dispatchers.IO) {
+                            database.get().await()
+                        }
+                        for (dataSnapshot in snapshot.children) {
+                            val data = dataSnapshot.value as Map<String, Any>
+                            var grades = java.util.HashMap<String, Double>()
+                            var sum: Double = 0.0
+                            if (data["grades"] != null) {
+                                for (g in data["grades"] as java.util.HashMap<String, Double>) {
+                                    grades[g.key] = g.value
+                                    sum += g.value
+                                }
+                                sum /= grades.size
 
-                    }
-
-
-                    for(placeSnapshot in result.children){
-                        var data = placeSnapshot.value as Map<*, *>?
-                        var grades = HashMap<String, Double>()
-                        var sum: Double = 0.0
-                        if (data?.get("grades") != null) {
-                            for (g in data["grades"] as HashMap<String, Double>) {
-                                grades[g.key] = g.value
-                                sum += g.value
                             }
-                            sum /= grades.size
+                            var comments = kotlin.collections.HashMap<String, String>()
+                            if (data["comments"] != null) {
+                                for (c in data["comments"] as kotlin.collections.HashMap<String, String>)
+                                    comments[c.key] = c.value
+                            }
+                            var url: String =
+                                "places/${data["name"]}${data["latitude"]}${data["longitude"]}.jpg"
+                            if (sum >= value.toDouble())
+                                myPlacesViewModel
+                                    .addPlace(
+                                        MyPlaces(
+                                            data["name"].toString(),
+                                            data["description"].toString(),
+                                            data["latitude"].toString(),
+                                            data["longitude"].toString(),
+                                            data["autor"].toString(),
+                                            grades,
+                                            comments,
+                                            url,
+                                            data["category"].toString(),
+                                            dataSnapshot.key.toString()
+
+                                        )
+                                    )
 
                         }
-                        var comments = HashMap<String, String>()
-                        if (data?.get("comments") != null) {
-                            for (c in data["comments"] as HashMap<String, String>)
-                                comments[c.key] = c.value
-                        }
-
-                        var url: String =
-                            "places/${data?.get("name")}${data?.get("latitude")}${data?.get("longitude")}.jpg"
-                        if (sum >= query.toDouble())
-                            //myPlacesViewModel
-                               // .addPlace(
-                                    list.add(MyPlaces(
-                                        data?.get("name")?.toString() ?: "",
-                                        data?.get("description")?.toString() ?: "",
-                                        data?.get("longitude")?.toString() ?: "",
-                                        data?.get("latitude")?.toString() ?: "",
-                                        data?.get("autor")?.toString()?: "",
-                                        grades,
-                                        comments,
-                                        url,
-                                        data?.get("category")?.toString() ?: "",
-                                        placeSnapshot.key.toString()
-
-                                    ))
-
+                        showList(requireView(),myPlacesViewModel.myPlacesList)
                     }
-
-                    showList(requireView(), list)//myPlacesViewModel.myPlacesList)
-
-                } else {
-                        if (category == 0) {
-
-                            result = withContext(Dispatchers.IO) {
-                                database.child(field)
-                                    .equalTo(query)
-                                    //.whereEqualTo(field, query)
-
-                                    .get()
-                                    .await()
-
+                    else{
+                        if (type == 0) {
+                            val query = database.orderByChild(field).equalTo(value)
+                            snapshot = withContext(Dispatchers.IO) {
+                                query.get().await()
                             }
 
                         } else {
-
-                            result = withContext(Dispatchers.IO) {
-                                database.child(field).startAt(query)
-                                   // .whereGreaterThanOrEqualTo(field, query)
-
-                                    .get()
-                                    .await()
+                            val query = database.orderByChild(field).startAt(value)
+                            snapshot = withContext(Dispatchers.IO) {
+                                query.get().await()
                             }
 
                         }
+                        myPlacesViewModel.myPlacesList.addAll(listCreating(snapshot))
 
-
-
-
-                    myPlacesViewModel.myPlacesList.addAll(listCreating(result))
-                    showList(requireView(), myPlacesViewModel.myPlacesList)
+                        showList(requireView(),myPlacesViewModel.myPlacesList)
+                    }
                 }
-            } catch (e: Exception) {
-                Log.w("TAGA", "Greska", e)
+                catch (e: java.lang.Exception) {
+                    Log.w("TAGA", "Greska", e)
+                }
             }
         }
-
-
     }
 
     private fun showPopupMenu(view: View, position: Int) {

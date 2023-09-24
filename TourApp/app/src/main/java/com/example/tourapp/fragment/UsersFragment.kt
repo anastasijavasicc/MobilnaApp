@@ -81,13 +81,18 @@ class UsersFragment : Fragment() {
                             (data["commentsCount"] as? Long ?: 0.0).toDouble(),
                             snapshot.key.toString()
                         )
+                        //var zbir = user.addCount + user.commentsCount + user.startCount
 
                         list.add(user)
                     }
+                    list.sortBy { it.addCount + it.commentsCount + it.startCount }    //.sortedBy { it.addCount + it.commentsCount + it.startCount }
                     if (ascending != 1) {
                         list.reverse()
                     }
                 }
+
+
+
 
                 withContext(Dispatchers.Main) {
                     showList(requireView(), list)

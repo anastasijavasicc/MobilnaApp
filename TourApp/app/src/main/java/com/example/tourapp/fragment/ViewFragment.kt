@@ -40,6 +40,7 @@ class ViewFragment : Fragment() {
         binding.viewmyplaceLongText.text = myPlacesViewModel.selected?.longitude
         binding.viewmyplaceLatText.text = myPlacesViewModel.selected?.latitude
         binding.viewmyplaceCategoryText.text = myPlacesViewModel.selected?.category
+
         //myPlacesViewModel.selected = null
 
         var sum:Double = 0.0

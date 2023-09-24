@@ -102,7 +102,7 @@ class ProfileFragment : Fragment() {
             val poeniUkupno = user.addCount+user.commentsCount
             nameDisplayTextView.text = user.firstName
             surnameDisplayTextView.text = user.lastName
-            pointss.text = user.addCount.toString()
+            pointss.text = (user.addCount + user.commentsCount + user.startCount).toString()
             phone.text = user.phoneNumber
             Glide.with(view.context)
                 .load(user.profilePhotoUrl)

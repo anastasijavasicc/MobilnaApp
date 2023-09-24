@@ -26,6 +26,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.example.tourapp.R
 import com.example.tourapp.activity.MainActivity
 import com.example.tourapp.data.ILocationClient
@@ -137,6 +138,13 @@ class EditFragment : Fragment(), ILocationClient {
             editLatitude.setText(myPlacesViewModel.selected?.latitude.toString())
             editCategory.setText(myPlacesViewModel.selected?.category)
             editAutor.setText(myPlacesViewModel.selected?.autor)
+
+
+           // val placeImageImageView: ImageView = requireView().findViewById(R.id.EditFragmentImg)
+           // Glide.with(view.context)
+             //   .load(myPlacesViewModel.selected?.url)
+               // .into(placeImageImageView)
+
             var sum = 0.0
             for (g in myPlacesViewModel.selected?.grades!!)
                 sum += g.value
@@ -147,6 +155,8 @@ class EditFragment : Fragment(), ILocationClient {
 
             addButton.setText(R.string.edit_fragment_save_label)
             editAutor.isEnabled = false
+            editLatitude.isEnabled = false
+            editLongitude.isEnabled = false
             ratGrade.isEnabled = false
         } else {
 
@@ -204,15 +214,13 @@ class EditFragment : Fragment(), ILocationClient {
             if (myPlacesViewModel.selected != null) {
                 myPlacesViewModel.selected?.name = name
                 myPlacesViewModel.selected?.description = desc
-                myPlacesViewModel.selected?.longitude = longitude
-                myPlacesViewModel.selected?.latitude = latitude
+                //myPlacesViewModel.selected?.longitude = longitude
+                //myPlacesViewModel.selected?.latitude = latitude
 
                 val documentRef = db.getReference("places").child(myPlacesViewModel.selected!!.id)
 
                 val place = hashMapOf(
                     "name" to name,
-                    "latitude" to latitude,
-                    "longitude" to longitude,
                     "description" to desc,
                     "category" to category
                 )

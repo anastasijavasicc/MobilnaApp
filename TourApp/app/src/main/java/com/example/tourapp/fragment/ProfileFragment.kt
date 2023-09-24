@@ -7,7 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.tourapp.R
 import com.example.tourapp.data.User
@@ -52,6 +54,16 @@ class ProfileFragment : Fragment() {
         userReference = database.reference.child("Users")
 
         createUser()
+        binding.myPlacesBtn.setOnClickListener{
+            findNavController().navigate(R.id.action_ProfileFragment_to_MyPlacesFragment)
+        }
+
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                findNavController().navigate(R.id.action_ProfileFragment_to_HomeFragment)
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
     }
     private fun createUser(){
         CoroutineScope(Dispatchers.IO).launch {
